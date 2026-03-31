@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(taskkill /PID 45364 /F)",
+      "Bash(cmd /c \"taskkill /PID 45364 /F\")",
+      "Bash(npx next:*)",
+      "Bash(netstat -ano)",
+      "Bash(cmd /c \"taskkill /PID 45364 /F /T\")",
+      "Bash(cmd /c \"taskkill /PID 24396 /F /T\")",
+      "Bash(taskkill //PID 45364 //F //T)",
+      "Bash(taskkill //PID 24396 //F //T)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)",
+      "Bash(cd:*)",
+      "Bash(taskkill //PID 10132 //F //T)",
+      "Bash(taskkill //PID 13668 //F //T)",
+      "Bash(curl -s http://localhost:3000)",
+      "Bash(curl -s -I http://localhost:3000)",
+      "Bash(grep -oE \"_next/static/[^/]+/[^\"]+.js \")",
+      "Bash(curl -s http://localhost:3000/test)"
+    ]
+  }
+}
