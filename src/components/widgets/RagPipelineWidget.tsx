@@ -30,12 +30,14 @@ function hashCode(str: string): number {
   return Math.abs(hash);
 }
 
-function generateEmbedding(question: string): number[] {
-  const h = hashCode(question);
+function generateEmbedding(question: string, runId: number): number[] {
   const embedding: number[] = [];
   for (let i = 0; i < 8; i++) {
-    const seed = hashCode(question + String(i) + String(h));
-    embedding.push(parseFloat(((seed % 10000) / 10000 - 0.5).toFixed(4)));
+    const seed = hashCode(question + String(i) + String(runId));
+    // Use seed to produce a pseudo-random float, then add slight noise per run
+    const base = ((seed % 10000) / 10000 - 0.5);
+    const noise = ((hashCode(String(runId) + String(i)) % 1000) / 10000 - 0.05);
+    embedding.push(parseFloat((base + noise).toFixed(4)));
   }
   return embedding;
 }
@@ -46,12 +48,11 @@ interface ScatterPoint {
   nearest: boolean;
 }
 
-function generateScatterPoints(question: string): ScatterPoint[] {
-  const h = hashCode(question);
+function generateScatterPoints(question: string, runId: number): ScatterPoint[] {
   const points: ScatterPoint[] = [];
   for (let i = 0; i < 8; i++) {
-    const sx = hashCode(question + "x" + i + h) % 1000;
-    const sy = hashCode(question + "y" + i + h) % 1000;
+    const sx = hashCode(question + "x" + i + String(runId)) % 1000;
+    const sy = hashCode(question + "y" + i + String(runId)) % 1000;
     points.push({
       x: 10 + (sx / 1000) * 80,
       y: 10 + (sy / 1000) * 80,
@@ -59,6 +60,15 @@ function generateScatterPoints(question: string): ScatterPoint[] {
     });
   }
   return points;
+}
+
+function generateTimings(runId: number) {
+  const s = hashCode(String(runId));
+  return {
+    embedMs: 8 + (s % 15),
+    searchMs: 1 + (s % 5),
+    totalTokens: 580 + (s % 120),
+  };
 }
 
 function ArrowConnector({ completed }: { completed: boolean }) {
@@ -92,6 +102,7 @@ export function RagPipelineWidget() {
   const [isAnimating, setIsAnimating] = useState(false);
   const [frozenStage, setFrozenStage] = useState<number | null>(null);
   const [streamedText, setStreamedText] = useState("");
+  const [runId, setRunId] = useState(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const streamRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -142,6 +153,7 @@ export function RagPipelineWidget() {
     clearTimers();
     setFrozenStage(null);
     setStreamedText("");
+    setRunId((prev) => prev + 1);
     setIsAnimating(true);
     setStage(0);
     advanceStage(0);
@@ -169,8 +181,9 @@ export function RagPipelineWidget() {
     return () => clearTimers();
   }, [clearTimers]);
 
-  const embedding = question.trim() ? generateEmbedding(question) : [];
-  const scatterPoints = question.trim() ? generateScatterPoints(question) : [];
+  const embedding = question.trim() ? generateEmbedding(question, runId) : [];
+  const scatterPoints = question.trim() ? generateScatterPoints(question, runId) : [];
+  const timings = generateTimings(runId);
 
   const stageBoxStyle = (idx: number): React.CSSProperties => {
     const isActive = idx === stage && isAnimating;
@@ -206,11 +219,13 @@ export function RagPipelineWidget() {
     };
   };
 
-  const searchScores = scatterPoints.map((pt, i) => ({
-    doc: `doc_${String(i + 1).padStart(3, "0")}`,
-    score: pt.nearest ? (0.92 - i * 0.05).toFixed(4) : (0.3 + Math.random() * 0.2).toFixed(4),
-    nearest: pt.nearest,
-  })).sort((a, b) => parseFloat(b.score) - parseFloat(a.score));
+  const searchScores = scatterPoints.map((pt, i) => {
+    const s = hashCode(String(runId) + "score" + String(i));
+    const score = pt.nearest
+      ? (0.88 + (s % 100) / 1000 - i * 0.04).toFixed(4)
+      : (0.25 + (s % 200) / 1000).toFixed(4);
+    return { doc: `doc_${String(i + 1).padStart(3, "0")}`, score, nearest: pt.nearest };
+  }).sort((a, b) => parseFloat(b.score) - parseFloat(a.score));
 
   const renderVerboseLog = () => {
     if (stage < 0) return null;
@@ -236,7 +251,7 @@ export function RagPipelineWidget() {
               <span style={{ color: "#4ade80" }}>&#10003;</span> Step 2 &middot; Generate Embedding Vector
             </div>
             <div className="font-mono text-xs mb-2" style={{ color: "#a1a1aa" }}>
-              model: all-MiniLM-L6-v2 &middot; dimensions: 8 &middot; elapsed: 12ms
+              model: all-MiniLM-L6-v2 &middot; dimensions: 8 &middot; elapsed: {timings.embedMs}ms
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
               {embedding.map((val, i) => (
@@ -258,7 +273,7 @@ export function RagPipelineWidget() {
               <span style={{ color: "#4ade80" }}>&#10003;</span> Step 3 &middot; HNSW Vector Index Search
             </div>
             <div className="font-mono text-xs mb-2" style={{ color: "#a1a1aa" }}>
-              index: VECIDX_DOCS_HNSW &middot; metric: cosine &middot; k=3 &middot; ef_search=40 &middot; elapsed: 3ms
+              index: VECIDX_DOCS_HNSW &middot; metric: cosine &middot; k=3 &middot; ef_search=40 &middot; elapsed: {timings.searchMs}ms
             </div>
             <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
               <svg width="140" height="100" viewBox="0 0 100 100" style={{ background: "rgba(0,0,0,0.3)", borderRadius: 6, flexShrink: 0 }}>
@@ -313,7 +328,7 @@ export function RagPipelineWidget() {
               <span style={{ color: "#4ade80" }}>&#10003;</span> Step 5 &middot; Assemble Prompt
             </div>
             <div className="font-mono text-xs mb-2" style={{ color: "#a1a1aa" }}>
-              template: rag_v2 &middot; total_tokens: ~620 &middot; context_window: 4096
+              template: rag_v2 &middot; total_tokens: ~{timings.totalTokens} &middot; context_window: 4096
             </div>
             <pre className="font-mono text-xs" style={{ padding: 10, borderRadius: 6, background: "rgba(0,0,0,0.3)", color: "#e4e4e7", whiteSpace: "pre-wrap", lineHeight: 1.6 }}>
               <span style={{ color: "#4ade80" }}>system:</span> You are a helpful Oracle Database assistant.{"\n\n"}
@@ -333,7 +348,7 @@ export function RagPipelineWidget() {
               {isAnimating ? <span style={{ color: "#fb923c" }}>&#9679;</span> : <span style={{ color: "#4ade80" }}>&#10003;</span>} Step 6 &middot; LLM Response
             </div>
             <div className="font-mono text-xs mb-2" style={{ color: "#a1a1aa" }}>
-              model: oracle-genai-v1 &middot; temperature: 0.1 &middot; tokens: {streamedText.length || SAMPLE_RESPONSE.length}
+              model: xai/grok-4 &middot; temperature: 0.1 &middot; tokens: {streamedText.length || SAMPLE_RESPONSE.length}
             </div>
             <div className="font-mono text-sm" style={{ color: "#e4e4e7", lineHeight: 1.6, padding: "8px 10px", borderRadius: 6, background: "rgba(0,0,0,0.2)" }}>
               {streamedText || SAMPLE_RESPONSE}
