@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import {
   JsonDualityWidget,
   CascadeWidget,
@@ -13,15 +14,30 @@ import {
 } from "@/components/widgets";
 
 export default function Home() {
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: "0px 0px -50px 0px" }
+    );
+    document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <main>
       {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-background/85 backdrop-blur-xl border-b border-border px-4 md:px-6 py-3 flex items-center gap-4">
         <a href="#" className="flex items-center gap-2 font-bold text-foreground no-underline shrink-0">
-          <div className="w-7 h-7 rounded-md bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center font-extrabold text-white text-sm">
+          <div className="w-7 h-7 rounded-md flex items-center justify-center font-extrabold text-white text-sm" style={{ background: "#C74634" }}>
             O
           </div>
-          <span className="hidden md:inline text-lg">/ blog</span>
+          <span className="hidden md:inline text-sm font-semibold">Oracle AI Database</span>
         </a>
         <div className="flex gap-3 md:gap-4 overflow-x-auto whitespace-nowrap scrollbar-hide ml-auto">
           <a href="#duality" className="text-muted-foreground no-underline text-xs md:text-sm font-medium hover:text-foreground transition-colors">Duality</a>
@@ -52,7 +68,7 @@ export default function Home() {
             Oracle AI Database<br />from the ground up
           </h1>
           <p className="text-lg text-muted-foreground max-w-xl">
-            Oracle Database 23ai converges <span className="text-relational">relational</span>,{" "}
+            Oracle AI Database converges <span className="text-relational">relational</span>,{" "}
             <span className="text-json">JSON</span>, <span className="text-graph">graph</span>, and{" "}
             <span className="text-vector">vector</span> data into a single engine — with <span className="text-rag">RAG pipelines</span>,{" "}
             <span className="text-hnsw">HNSW indexing</span>, <span className="text-onnx">in-database ML</span>, and{" "}
@@ -80,7 +96,7 @@ export default function Home() {
         </div>
 
         {/* ===== JSON Duality Section ===== */}
-        <section id="duality">
+        <section id="duality" className="reveal">
           <h2 className="text-3xl font-bold leading-tight mt-14 mb-4">What are JSON Duality Views?</h2>
           <p className="text-muted-foreground mb-4">
             Relational databases store data in <span className="text-relational">tables</span> — rows and columns with strict schemas. Document databases store data as flexible <span className="text-json">JSON documents</span>. Developers have been forced to choose one or the other, or glue them together with complex ORM layers.
@@ -95,7 +111,7 @@ export default function Home() {
         </section>
 
         {/* ===== Cascading Updates Section ===== */}
-        <section id="cascade">
+        <section id="cascade" className="reveal">
           <h2 className="text-3xl font-bold leading-tight mt-14 mb-4">How cascading updates propagate</h2>
           <p className="text-muted-foreground mb-4">
             The real magic happens when data has <em>relationships</em>. In a duality view, updating a <span className="text-keyword">foreign key</span> in the relational side automatically restructures the JSON document.
@@ -110,13 +126,13 @@ export default function Home() {
         </section>
 
         {/* ===== Property Graphs Section ===== */}
-        <section id="graphs">
+        <section id="graphs" className="reveal">
           <h2 className="text-3xl font-bold leading-tight mt-14 mb-4">What are Property Graphs?</h2>
           <p className="text-muted-foreground mb-4">
             Some data is inherently about <em>connections</em>. Social networks, supply chains, fraud rings — these are best understood as <span className="text-graph">graphs</span> of entities linked by relationships.
           </p>
           <p className="text-muted-foreground mb-4">
-            A <strong>property graph</strong> consists of <span className="text-graph">nodes</span> (entities) and <span className="text-graph">edges</span> (relationships). Both can carry <span className="text-keyword">properties</span> — key-value pairs. Oracle Database 23ai lets you define property graphs on your relational tables, querying them with the SQL/PGQ standard.
+            A <strong>property graph</strong> consists of <span className="text-graph">nodes</span> (entities) and <span className="text-graph">edges</span> (relationships). Both can carry <span className="text-keyword">properties</span> — key-value pairs. Oracle AI Database lets you define property graphs on your relational tables, querying them with the SQL/PGQ standard.
           </p>
           <p className="text-muted-foreground mb-4">
             <strong>Hover</strong> over any node to see its properties and highlight connections. <strong>Click</strong> to lock selection.
@@ -128,10 +144,10 @@ export default function Home() {
         </section>
 
         {/* ===== Vector Search Section ===== */}
-        <section id="vectors">
+        <section id="vectors" className="reveal">
           <h2 className="text-3xl font-bold leading-tight mt-14 mb-4">How does Similarity Search work?</h2>
           <p className="text-muted-foreground mb-4">
-            Modern AI models convert text, images, and audio into <span className="text-vector">vectors</span> — arrays of numbers that capture <em>semantic meaning</em>. Similar things end up close together in vector space. Oracle Database 23ai stores these vectors and finds closest matches via <strong>similarity search</strong>.
+            Modern AI models convert text, images, and audio into <span className="text-vector">vectors</span> — arrays of numbers that capture <em>semantic meaning</em>. Similar things end up close together in vector space. Oracle AI Database stores these vectors and finds closest matches via <strong>similarity search</strong>.
           </p>
           <p className="text-muted-foreground mb-4">
             <strong>Click anywhere</strong> in the space to move the <span className="text-purple-400 font-bold">pink query point</span> and watch nearest neighbors update. Use the <strong>k slider</strong> to change how many neighbors to find.
@@ -143,7 +159,7 @@ export default function Home() {
         </section>
 
         {/* ===== HNSW Index Section ===== */}
-        <section id="hnsw">
+        <section id="hnsw" className="reveal">
           <h2 className="text-3xl font-bold leading-tight mt-14 mb-4">Inside the HNSW Index</h2>
           <p className="text-muted-foreground mb-4">
             Brute-force similarity search checks every vector — that&apos;s O(n) and far too slow for millions of vectors. Oracle uses <span className="text-hnsw">HNSW</span> (Hierarchical Navigable Small World) indexes to achieve <span className="text-hnsw">O(log n)</span> approximate nearest neighbor search.
@@ -161,13 +177,13 @@ export default function Home() {
         </section>
 
         {/* ===== RAG Pipeline Section ===== */}
-        <section id="rag">
+        <section id="rag" className="reveal">
           <h2 className="text-3xl font-bold leading-tight mt-14 mb-4">The RAG Pipeline, demystified</h2>
           <p className="text-muted-foreground mb-4">
             <span className="text-rag">Retrieval-Augmented Generation</span> (RAG) is the dominant pattern for building AI applications that need factual, up-to-date answers. Instead of relying solely on the LLM&apos;s training data, RAG retrieves relevant documents and feeds them as context.
           </p>
           <p className="text-muted-foreground mb-4">
-            Oracle Database 23ai runs the entire RAG pipeline in-database: <span className="text-vector">vector embeddings</span>, <span className="text-hnsw">similarity search</span>, and context assembly — all without data ever leaving the database. Type a question and watch each stage light up.
+            Oracle AI Database runs the entire RAG pipeline in-database: <span className="text-vector">vector embeddings</span>, <span className="text-hnsw">similarity search</span>, and context assembly — all without data ever leaving the database. Type a question and watch each stage light up.
           </p>
           <RagPipelineWidget />
           <p className="text-muted-foreground mb-4">
@@ -176,13 +192,13 @@ export default function Home() {
         </section>
 
         {/* ===== ACID Section ===== */}
-        <section id="acid">
+        <section id="acid" className="reveal">
           <h2 className="text-3xl font-bold leading-tight mt-14 mb-4">Why ACID matters for AI</h2>
           <p className="text-muted-foreground mb-4">
             Most vector databases sacrifice <span className="text-acid">ACID transactions</span> for speed. This works fine for demos — but in production, concurrent users reading and writing vectors creates real problems: <em>phantom reads</em>, <em>dirty reads</em>, and <em>lost updates</em>.
           </p>
           <p className="text-muted-foreground mb-4">
-            Oracle Database 23ai provides full ACID guarantees on vector operations. Below, watch two concurrent users interact with the same data. On the left: Oracle&apos;s transactional consistency. On the right: what happens without it.
+            Oracle AI Database provides full ACID guarantees on vector operations. Below, watch two concurrent users interact with the same data. On the left: Oracle&apos;s transactional consistency. On the right: what happens without it.
           </p>
           <AcidRaceWidget />
           <p className="text-muted-foreground mb-4">
@@ -191,10 +207,10 @@ export default function Home() {
         </section>
 
         {/* ===== ONNX In-DB Section ===== */}
-        <section id="onnx">
+        <section id="onnx" className="reveal">
           <h2 className="text-3xl font-bold leading-tight mt-14 mb-4">Neural Networks inside the Database</h2>
           <p className="text-muted-foreground mb-4">
-            Traditionally, ML inference requires extracting data from the database, sending it to an external service, and writing predictions back. Oracle Database 23ai runs <span className="text-onnx">ONNX models directly inside the database</span> — data never leaves.
+            Traditionally, ML inference requires extracting data from the database, sending it to an external service, and writing predictions back. Oracle AI Database runs <span className="text-onnx">ONNX models directly inside the database</span> — data never leaves.
           </p>
           <p className="text-muted-foreground mb-4">
             This eliminates network latency, reduces security risk, and simplifies architecture. Toggle between <span className="text-onnx">in-database</span> and <span className="text-relational">traditional</span> modes to see the difference.
@@ -206,10 +222,10 @@ export default function Home() {
         </section>
 
         {/* ===== JSON Path Section ===== */}
-        <section id="jsonpath">
+        <section id="jsonpath" className="reveal">
           <h2 className="text-3xl font-bold leading-tight mt-14 mb-4">SQL/JSON Path Expressions</h2>
           <p className="text-muted-foreground mb-4">
-            Oracle Database 23ai supports the <span className="text-jsonpath">SQL/JSON path language</span> for querying nested JSON documents. Path expressions let you navigate objects, filter arrays, and extract values — all within SQL.
+            Oracle AI Database supports the <span className="text-jsonpath">SQL/JSON path language</span> for querying nested JSON documents. Path expressions let you navigate objects, filter arrays, and extract values — all within SQL.
           </p>
           <p className="text-muted-foreground mb-4">
             Type a path expression in the input below and watch matching nodes <span className="text-jsonpath">light up</span> in real time. Try the pre-built examples to explore different path features.
@@ -224,10 +240,10 @@ export default function Home() {
         <section>
           <h2 className="text-3xl font-bold leading-tight mt-14 mb-4">The convergence advantage</h2>
           <p className="text-muted-foreground mb-4">
-            What makes Oracle Database 23ai unique is that <span className="text-relational">relational</span>, <span className="text-json">JSON</span>, <span className="text-graph">graph</span>, and <span className="text-vector">vector</span> operations all happen in the <strong>same engine, on the same data</strong>. Add <span className="text-hnsw">HNSW indexing</span> for scale, <span className="text-rag">RAG pipelines</span> for AI applications, <span className="text-onnx">in-database ML inference</span> for simplicity, and <span className="text-acid">ACID transactions</span> for production reliability.
+            What makes Oracle AI Database unique is that <span className="text-relational">relational</span>, <span className="text-json">JSON</span>, <span className="text-graph">graph</span>, and <span className="text-vector">vector</span> operations all happen in the <strong>same engine, on the same data</strong>. Add <span className="text-hnsw">HNSW indexing</span> for scale, <span className="text-rag">RAG pipelines</span> for AI applications, <span className="text-onnx">in-database ML inference</span> for simplicity, and <span className="text-acid">ACID transactions</span> for production reliability.
           </p>
           <p className="text-muted-foreground mb-4">
-            This isn&apos;t just convenient — it&apos;s a fundamental architectural advantage. When your AI application needs to combine semantic search with structured filters, relationship traversals, and ML inference, Oracle 23ai handles it all natively, in a single SQL query, with full transactional guarantees.
+            This isn&apos;t just convenient — it&apos;s a fundamental architectural advantage. When your AI application needs to combine semantic search with structured filters, relationship traversals, and ML inference, Oracle AI Database handles it all natively, in a single SQL query, with full transactional guarantees.
           </p>
         </section>
       </div>
@@ -236,8 +252,8 @@ export default function Home() {
       <footer className="border-t border-border py-12 px-6">
         <div className="max-w-3xl mx-auto text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="w-6 h-6 rounded-md bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center font-extrabold text-white text-xs">O</div>
-            <span className="font-semibold">Oracle Database 23ai</span>
+            <div className="w-6 h-6 rounded-md flex items-center justify-center font-extrabold text-white text-xs" style={{ background: "#C74634" }}>O</div>
+            <span className="font-semibold">Oracle AI Database</span>
           </div>
           <p className="text-muted-foreground text-sm mb-3">
             9 interactive explorations: JSON Duality Views, Cascading Updates, Property Graphs, Vector Search, HNSW Indexing, RAG Pipelines, ACID Transactions, In-Database ONNX, and SQL/JSON Path.

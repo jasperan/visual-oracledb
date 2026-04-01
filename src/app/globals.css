@@ -55,7 +55,7 @@
   --card-foreground: #e4e4e7;
   --popover: #18181b;
   --popover-foreground: #e4e4e7;
-  --primary: #f97316;
+  --primary: #C74634;
   --primary-foreground: #0d0d0f;
   --secondary: #1e1e22;
   --secondary-foreground: #e4e4e7;
@@ -67,7 +67,7 @@
   --border: rgba(255, 255, 255, 0.08);
   --input: rgba(255, 255, 255, 0.08);
   --ring: #22d3ee;
-  --chart-1: #f97316;
+  --chart-1: #C74634;
   --chart-2: #22d3ee;
   --chart-3: #4ade80;
   --chart-4: #a78bfa;
@@ -75,7 +75,7 @@
   --radius: 0.625rem;
   --sidebar: #18181b;
   --sidebar-foreground: #e4e4e7;
-  --sidebar-primary: #f97316;
+  --sidebar-primary: #C74634;
   --sidebar-primary-foreground: #0d0d0f;
   --sidebar-accent: #1e1e22;
   --sidebar-accent-foreground: #e4e4e7;
@@ -186,6 +186,22 @@ nav::after {
   animation: fadeInUp 0.5s ease-out both;
 }
 
+/* Scroll-triggered reveal animations */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+
 /* JSON syntax highlighting */
 .json-key { color: #22d3ee; }
 .json-string { color: #4ade80; }
@@ -274,7 +290,7 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 /* Color classes for terminology */
-.text-relational { color: #f97316; font-weight: 600; }
+.text-relational { color: #C74634; font-weight: 600; }
 .text-json { color: #22d3ee; font-weight: 600; }
 .text-graph { color: #4ade80; font-weight: 600; }
 .text-vector { color: #a78bfa; font-weight: 600; }

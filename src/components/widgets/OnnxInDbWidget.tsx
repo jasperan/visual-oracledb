@@ -79,16 +79,24 @@ export function OnnxInDbWidget() {
     reset();
     setIsProcessing(true);
 
-    const perRowDelay = mode === "indb" ? 2 : 150;
     const layerAnimDelay = 200;
     const totalLayers = LAYERS.length;
-    let currentLatency = 0;
 
-    // Start latency counter
+    // Realistic latency model:
+    // In-DB: ~2ms inference per row (no network hop)
+    // Traditional: ~8ms serialization + ~45ms network RTT + ~2ms inference + ~45ms return + ~8ms deserialization = ~108ms per row
+    const perRowLatencyMs = mode === "indb" ? 2 : 108;
+    let simulatedLatency = 0;
+
+    // Start latency counter that ticks at realistic rate
+    const startTime = Date.now();
     const latencyInterval = setInterval(() => {
-      currentLatency += 1;
-      setLatency(currentLatency);
-    }, mode === "indb" ? 50 : 7);
+      const elapsed = Date.now() - startTime;
+      // Map real animation time to simulated latency
+      const progress = Math.min(elapsed / (dataRows.length * (mode === "indb" ? 600 : 1200)), 1);
+      simulatedLatency = Math.round(progress * dataRows.length * perRowLatencyMs);
+      setLatency(simulatedLatency);
+    }, 30);
     latencyRef.current = latencyInterval;
 
     let totalDelay = 0;
@@ -128,7 +136,7 @@ export function OnnxInDbWidget() {
       setActiveLayer(-1);
       setIsProcessing(false);
       clearInterval(latencyInterval);
-      setLatency(Math.round(dataRows.length * perRowDelay));
+      setLatency(dataRows.length * perRowLatencyMs);
     }, totalDelay + 200);
   }, [isProcessing, mode, reset]);
 
@@ -544,6 +552,11 @@ export function OnnxInDbWidget() {
           </span>
           <span className="text-muted-foreground">
             Latency: <span className={mode === "indb" ? "text-emerald-400" : "text-amber-400"}>{latency}ms</span>
+            {processedRows > 0 && (
+              <span className="text-muted-foreground ml-1 text-xs">
+                ({mode === "indb" ? "2ms/row inference" : "8ms ser + 45ms RTT + 2ms inf + 45ms RTT + 8ms deser"})
+              </span>
+            )}
           </span>
         </div>
 

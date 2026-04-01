@@ -14,13 +14,13 @@ const STAGE_LABELS = [
 const STAGE_ICONS = ["\u2753", "\u{1F9EE}", "\u{1F50D}", "\u{1F4C4}", "\u{1F9E9}", "\u{1F916}"];
 
 const DOC_CHUNKS = [
-  "Oracle Database 23ai supports JSON Duality Views that provide both relational and JSON access to the same data...",
+  "Oracle AI Database supports JSON Duality Views that provide both relational and JSON access to the same data...",
   "Vector indexes in Oracle use HNSW or IVF algorithms for approximate nearest neighbor search at scale...",
   "Property graphs in Oracle enable traversal queries using SQL/PGQ standard syntax...",
 ];
 
 const SAMPLE_RESPONSE =
-  "Oracle Database 23ai provides JSON Duality Views which allow simultaneous relational and JSON access. Combined with vector similarity search and property graph traversal, it offers a converged data platform for AI applications.";
+  "Oracle AI Database provides JSON Duality Views which allow simultaneous relational and JSON access. Combined with vector similarity search and property graph traversal, it offers a converged data platform for AI applications.";
 
 function hashCode(str: string): number {
   let hash = 5381;
@@ -362,7 +362,7 @@ export function RagPipelineWidget() {
           onKeyDown={(e) => {
             if (e.key === "Enter") runPipeline();
           }}
-          placeholder="Ask about Oracle Database 23ai..."
+          placeholder="Ask about Oracle AI Database..."
           disabled={isAnimating}
           className="font-mono text-sm"
           style={{

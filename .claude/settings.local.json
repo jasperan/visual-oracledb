@@ -18,7 +18,8 @@
       "Bash(curl -s http://localhost:3000)",
       "Bash(curl -s -I http://localhost:3000)",
       "Bash(grep -oE \"_next/static/[^/]+/[^\"]+.js \")",
-      "Bash(curl -s http://localhost:3000/test)"
+      "Bash(curl -s http://localhost:3000/test)",
+      "mcp__Claude_Preview__preview_start"
     ]
   }
 }
