@@ -177,12 +177,49 @@ export function VectorSearchWidget() {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width;
-    const y = 1 - (e.clientY - rect.top) / rect.height;
+
+    // Convert click to canvas pixel coordinates
+    const targetScreenX = (e.clientX - rect.left) / rect.width * canvas.width;
+    const targetScreenY = (e.clientY - rect.top) / rect.height * canvas.height;
+    const w = canvas.width;
+    const h = canvas.height;
+    const z = 0.5;
+
+    // Inverse-project: find (x, y) such that project(x, y, z) ≈ (targetScreenX, targetScreenY)
+    // Use Newton's method with a few iterations
+    const angle = (rotation * Math.PI) / 180;
+    const cosA = Math.cos(angle);
+    const sinA = Math.sin(angle);
+
+    // Solve for x from screenX equation:
+    // screenX = (x*cosA - z*sinA - 0.5) * w * 0.7 * (1 + (x*sinA + z*cosA)*0.3) + w/2
+    // This is quadratic in x — iterate to solve
+    let xGuess = 0.5;
+    for (let i = 0; i < 10; i++) {
+      const rx = xGuess * cosA - z * sinA;
+      const rz = xGuess * sinA + z * cosA;
+      const persp = 1 + rz * 0.3;
+      const sx = (rx - 0.5) * w * 0.7 * persp + w / 2;
+      const errorX = sx - targetScreenX;
+      // Numerical derivative
+      const dx = 0.001;
+      const rx2 = (xGuess + dx) * cosA - z * sinA;
+      const rz2 = (xGuess + dx) * sinA + z * cosA;
+      const persp2 = 1 + rz2 * 0.3;
+      const sx2 = (rx2 - 0.5) * w * 0.7 * persp2 + w / 2;
+      const dSxDx = (sx2 - sx) / dx;
+      if (Math.abs(dSxDx) > 0.001) xGuess -= errorX / dSxDx;
+    }
+
+    // Solve for y from screenY equation (simpler — y doesn't affect perspective when x is known):
+    const rz = xGuess * sinA + z * cosA;
+    const persp = 1 + rz * 0.3;
+    const yGuess = (targetScreenY - h / 2) / (h * -0.7 * persp) + 0.5;
+
     setQuery({
-      x: Math.max(0.1, Math.min(0.9, x)),
-      y: Math.max(0.1, Math.min(0.9, y)),
-      z: 0.5,
+      x: Math.max(0.05, Math.min(0.95, xGuess)),
+      y: Math.max(0.05, Math.min(0.95, yGuess)),
+      z,
     });
   };
 
