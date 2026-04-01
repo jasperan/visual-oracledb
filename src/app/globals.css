@@ -100,6 +100,13 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Hide scrollbars on nav */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Hide Next.js dev indicator */
+[data-nextjs-toast], nextjs-portal { display: none !important; }
+
 .font-mono {
   font-family: var(--font-mono);
 }
@@ -273,3 +280,91 @@ input[type="range"]::-webkit-slider-thumb {
 .text-vector { color: #a78bfa; font-weight: 600; }
 .text-keyword { color: #facc15; font-weight: 600; }
 .text-destructive { color: #f43f5e; font-weight: 600; }
+.text-rag { color: #fb923c; font-weight: 600; }
+.text-hnsw { color: #38bdf8; font-weight: 600; }
+.text-acid { color: #f472b6; font-weight: 600; }
+.text-onnx { color: #34d399; font-weight: 600; }
+.text-jsonpath { color: #fbbf24; font-weight: 600; }
+
+/* Pipeline stage styles */
+.pipeline-stage {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  background: rgba(255,255,255,0.02);
+  text-align: center;
+  min-width: 80px;
+}
+
+.pipeline-stage:hover {
+  border-color: rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.04);
+}
+
+.pipeline-stage.active {
+  border-color: #fb923c;
+  box-shadow: 0 0 12px rgba(251,146,60,0.2);
+}
+
+.pipeline-stage.completed {
+  border-color: #4ade80;
+}
+
+/* Neural network node */
+.nn-node {
+  transition: all 0.3s ease;
+}
+
+.nn-node.activated {
+  filter: brightness(1.5) drop-shadow(0 0 6px rgba(52,211,153,0.6));
+}
+
+/* JSON tree node highlight */
+.json-tree-matched {
+  background: rgba(251,191,36,0.15);
+  border-radius: 3px;
+  padding: 0 0.2em;
+}
+
+/* HNSW layer styling */
+.hnsw-layer {
+  border: 1px dashed rgba(56,189,248,0.3);
+  border-radius: 8px;
+  padding: 0.5rem;
+  position: relative;
+}
+
+/* Slide-in animation for cards */
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-slide-in {
+  animation: slideInRight 0.4s ease-out both;
+}
+
+/* Pulse glow for active elements */
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 4px rgba(251,146,60,0.3); }
+  50% { box-shadow: 0 0 16px rgba(251,146,60,0.6); }
+}
+
+.pulse-glow {
+  animation: pulseGlow 1.5s ease-in-out infinite;
+}
+
+/* Typewriter cursor blink */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.typewriter-cursor::after {
+  content: '▊';
+  animation: blink 0.8s infinite;
+  color: #fb923c;
+  margin-left: 1px;
+}
