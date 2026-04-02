@@ -494,11 +494,6 @@ export function VectorSearchWidget() {
     [inverseProject]
   );
 
-  const handleWheel = useCallback((e: React.WheelEvent<HTMLCanvasElement>) => {
-    e.preventDefault();
-    setZoom((prev) => Math.max(0.4, Math.min(3.0, prev + e.deltaY * 0.001)));
-  }, []);
-
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
   }, []);
@@ -513,9 +508,12 @@ export function VectorSearchWidget() {
         <label className="font-mono text-sm text-muted-foreground">k nearest:</label>
         <input type="range" min="1" max="8" value={k} onChange={(e) => setK(Number(e.target.value))} className="w-28" />
         <span className="font-mono text-purple-400">{k}</span>
+        <label className="font-mono text-sm text-muted-foreground ml-4">Zoom:</label>
+        <input type="range" min="40" max="300" value={Math.round(zoom * 100)} onChange={(e) => setZoom(Number(e.target.value) / 100)} className="w-28" />
+        <span className="font-mono text-purple-400">{Math.round(zoom * 100)}%</span>
         <div className="flex-1" />
         <span className="font-mono text-xs text-muted-foreground">
-          Drag: orbit &middot; Shift+Drag: pan &middot; Scroll: zoom &middot; Drag query to move
+          Drag: orbit &middot; Shift+Drag: pan &middot; Drag query to move
         </span>
       </div>
 
@@ -532,7 +530,6 @@ export function VectorSearchWidget() {
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
-          onWheel={handleWheel}
           onContextMenu={handleContextMenu}
         />
       </div>

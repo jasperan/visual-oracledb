@@ -141,8 +141,25 @@ export function PropertyGraphWidget() {
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
   const [shortestPath, setShortestPath] = useState<string[] | null>(null);
   const [showQuery, setShowQuery] = useState(true);
+  const [draggedNode, setDraggedNode] = useState<string | null>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
   const simRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const simTickRef = useRef(0);
+  const dragStartPos = useRef<{ x: number; y: number } | null>(null);
+  const didDrag = useRef(false);
+
+  // Convert mouse event to SVG coordinates
+  const mouseToSvg = useCallback((e: React.MouseEvent | MouseEvent) => {
+    const svg = svgRef.current;
+    if (!svg) return { x: 0, y: 0 };
+    const rect = svg.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 680;
+    const y = ((e.clientY - rect.top) / rect.height) * 500;
+    return { x, y };
+  }, []);
+
+  // Ref to track which node is currently being dragged (avoids stale closures in sim)
+  const draggedNodeRef = useRef<string | null>(null);
 
   // Force simulation on mount
   useEffect(() => {
@@ -152,7 +169,7 @@ export function PropertyGraphWidget() {
 
     simRef.current = setInterval(() => {
       simTickRef.current++;
-      if (simTickRef.current > 120) {
+      if (simTickRef.current > 120 && !draggedNodeRef.current) {
         if (simRef.current) clearInterval(simRef.current);
         return;
       }
@@ -201,8 +218,13 @@ export function PropertyGraphWidget() {
           n.vy += (SVG_H / 2 - n.y) * 0.005 * alpha;
         }
 
-        // Apply velocity with damping
+        // Apply velocity with damping — but freeze the dragged node
         for (const n of next) {
+          if (n.id === draggedNodeRef.current) {
+            n.vx = 0;
+            n.vy = 0;
+            continue;
+          }
           n.vx *= 0.6;
           n.vy *= 0.6;
           n.x = Math.max(40, Math.min(SVG_W - 40, n.x + n.vx));
@@ -221,29 +243,64 @@ export function PropertyGraphWidget() {
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     const rect = e.currentTarget.getBoundingClientRect();
     setTooltipPos({ x: e.clientX - rect.left + 10, y: e.clientY - rect.top + 10 });
+
+    // Handle node dragging
+    if (draggedNodeRef.current) {
+      const svgPos = mouseToSvg(e);
+      didDrag.current = true;
+      setNodes((prev) =>
+        prev.map((n) =>
+          n.id === draggedNodeRef.current
+            ? { ...n, x: Math.max(40, Math.min(640, svgPos.x)), y: Math.max(40, Math.min(460, svgPos.y)), vx: 0, vy: 0 }
+            : n
+        )
+      );
+      // Reheat sim so neighbors adjust
+      simTickRef.current = Math.min(simTickRef.current, 80);
+    }
+  }, [mouseToSvg]);
+
+  const handleNodeMouseDown = useCallback((e: React.MouseEvent, nodeId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    draggedNodeRef.current = nodeId;
+    setDraggedNode(nodeId);
+    dragStartPos.current = { x: e.clientX, y: e.clientY };
+    didDrag.current = false;
+
+    // Restart sim if it had stopped, so other nodes react to the drag
+    if (simTickRef.current > 120) {
+      simTickRef.current = 80;
+    }
   }, []);
 
-  const handleNodeClick = useCallback(
-    (nodeId: string) => {
-      setSelectedNodes((prev) => {
-        if (prev.length === 0) {
+  const handleMouseUp = useCallback(() => {
+    if (draggedNodeRef.current) {
+      const wasClick = !didDrag.current;
+      const nodeId = draggedNodeRef.current;
+      draggedNodeRef.current = null;
+      setDraggedNode(null);
+      dragStartPos.current = null;
+
+      if (wasClick) {
+        // Treat as a click — trigger selection
+        setSelectedNodes((prev) => {
+          if (prev.length === 0) {
+            setShortestPath(null);
+            return [nodeId];
+          }
+          if (prev.length === 1 && prev[0] !== nodeId) {
+            const path = findShortestPath(prev[0], nodeId);
+            setShortestPath(path);
+            return [prev[0], nodeId];
+          }
           setShortestPath(null);
+          if (prev.includes(nodeId)) return [];
           return [nodeId];
-        }
-        if (prev.length === 1 && prev[0] !== nodeId) {
-          // Two nodes selected — find path
-          const path = findShortestPath(prev[0], nodeId);
-          setShortestPath(path);
-          return [prev[0], nodeId];
-        }
-        // Reset
-        setShortestPath(null);
-        if (prev.includes(nodeId)) return [];
-        return [nodeId];
-      });
-    },
-    []
-  );
+        });
+      }
+    }
+  }, []);
 
   const filteredNodes = nodes.filter((n) => {
     if (filter === "all") return true;
@@ -295,8 +352,8 @@ export function PropertyGraphWidget() {
         Interactive &middot; Property Graph Visualization
       </div>
 
-      <div className="relative w-full min-h-[500px]" onMouseMove={handleMouseMove} onMouseLeave={() => setHoveredNode(null)}>
-        <svg viewBox="0 0 680 500" className="w-full h-[500px]">
+      <div className="relative w-full min-h-[500px]" onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={() => { setHoveredNode(null); handleMouseUp(); }}>
+        <svg ref={svgRef} viewBox="0 0 680 500" className="w-full h-[500px]">
           {/* Grid */}
           {Array.from({ length: 17 }).map((_, i) => (
             <line key={`v-${i}`} x1={i * 40} y1="0" x2={i * 40} y2="500" stroke="rgba(255,255,255,0.02)" strokeWidth="0.5" />
@@ -380,13 +437,14 @@ export function PropertyGraphWidget() {
             return (
               <g
                 key={node.id}
-                className="graph-node cursor-pointer"
-                onMouseEnter={() => setHoveredNode(node.id)}
-                onMouseLeave={() => setHoveredNode(null)}
-                onClick={() => handleNodeClick(node.id)}
+                className="graph-node"
                 style={{
                   opacity: (selectedNodes.length > 0 || shortestPath) && !active && !isPathNode ? 0.25 : 1,
+                  cursor: draggedNode === node.id ? "grabbing" : "grab",
                 }}
+                onMouseEnter={() => { if (!draggedNodeRef.current) setHoveredNode(node.id); }}
+                onMouseLeave={() => { if (!draggedNodeRef.current) setHoveredNode(null); }}
+                onMouseDown={(e) => handleNodeMouseDown(e, node.id)}
               >
                 {/* Selection ring */}
                 {isSelected && (
@@ -473,7 +531,7 @@ export function PropertyGraphWidget() {
           </span>
         ))}
         <span className="text-border">|</span>
-        <span>Click one node: show connections. Click two: find shortest path.</span>
+        <span>Click: select. Drag: reposition. Click two: shortest path.</span>
       </div>
     </div>
   );
