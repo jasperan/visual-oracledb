@@ -82,9 +82,9 @@ export function VectorSearchWidget() {
       const upZ = sinEl * cosAz;
 
       // Camera position
-      const camX = -fwdX * CAM_DIST * zoom;
-      const camY = -fwdY * CAM_DIST * zoom;
-      const camZ = -fwdZ * CAM_DIST * zoom;
+      const camX = -fwdX * CAM_DIST / zoom;
+      const camY = -fwdY * CAM_DIST / zoom;
+      const camZ = -fwdZ * CAM_DIST / zoom;
 
       // Vector from camera to point
       const dx = cx - camX;
@@ -124,9 +124,9 @@ export function VectorSearchWidget() {
       const upY = -cosEl;
       const upZ = sinEl * cosAz;
 
-      const camX = -fwdX * CAM_DIST * zoom;
-      const camY = -fwdY * CAM_DIST * zoom;
-      const camZ = -fwdZ * CAM_DIST * zoom;
+      const camX = -fwdX * CAM_DIST / zoom;
+      const camY = -fwdY * CAM_DIST / zoom;
+      const camZ = -fwdZ * CAM_DIST / zoom;
 
       // We want to find a 3D point at a given view-depth
       // Use the reference depth from the current query point

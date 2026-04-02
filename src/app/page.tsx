@@ -9,6 +9,7 @@ import {
   HnswIndexWidget,
   RagPipelineWidget,
   AcidRaceWidget,
+  DeepSecurityWidget,
   OnnxInDbWidget,
   JsonPathWidget,
 } from "@/components/widgets";
@@ -46,6 +47,7 @@ export default function Home() {
           <a href="#hnsw" className="text-muted-foreground no-underline text-xs md:text-sm font-medium hover:text-foreground transition-colors">HNSW</a>
           <a href="#rag" className="text-muted-foreground no-underline text-xs md:text-sm font-medium hover:text-foreground transition-colors">RAG</a>
           <a href="#acid" className="text-muted-foreground no-underline text-xs md:text-sm font-medium hover:text-foreground transition-colors">ACID</a>
+          <a href="#security" className="text-muted-foreground no-underline text-xs md:text-sm font-medium hover:text-foreground transition-colors">Security</a>
           <a href="#onnx" className="text-muted-foreground no-underline text-xs md:text-sm font-medium hover:text-foreground transition-colors">ONNX</a>
           <a href="#jsonpath" className="text-muted-foreground no-underline text-xs md:text-sm font-medium hover:text-foreground transition-colors">JSON Path</a>
         </div>
@@ -69,8 +71,8 @@ export default function Home() {
           </h1>
           <p className="text-lg text-muted-foreground max-w-xl">
             Oracle AI Database converges <span className="text-relational">relational</span>,{" "}
-            <span className="text-json">JSON</span>, <span className="text-graph">graph</span>, and{" "}
-            <span className="text-vector">vector</span> data into a single engine — with <span className="text-rag">RAG pipelines</span>,{" "}
+            <span className="text-json">JSON</span>, <span className="text-graph">graph</span>,{" "}
+            <span className="text-vector">vector</span>, and more (XML, Text, Spatial, RDF) into a single engine — with <span className="text-rag">RAG pipelines</span>,{" "}
             <span className="text-hnsw">HNSW indexing</span>, <span className="text-onnx">in-database ML</span>, and{" "}
             <span className="text-acid">ACID guarantees</span>. Let&apos;s explore each capability interactively.
           </p>
@@ -90,6 +92,7 @@ export default function Home() {
             <li><a href="#hnsw" className="text-muted-foreground no-underline hover:text-cyan-400">How HNSW indexes achieve O(log n) similarity search</a></li>
             <li><a href="#rag" className="text-muted-foreground no-underline hover:text-cyan-400">How RAG pipelines combine vector search with language models</a></li>
             <li><a href="#acid" className="text-muted-foreground no-underline hover:text-cyan-400">Why ACID transactions matter for AI workloads</a></li>
+            <li><a href="#security" className="text-muted-foreground no-underline hover:text-cyan-400">How Deep Data Security protects vector search results</a></li>
             <li><a href="#onnx" className="text-muted-foreground no-underline hover:text-cyan-400">Running neural network inference inside the database</a></li>
             <li><a href="#jsonpath" className="text-muted-foreground no-underline hover:text-cyan-400">Querying JSON documents with SQL/JSON path expressions</a></li>
           </ul>
@@ -105,7 +108,7 @@ export default function Home() {
             <strong>JSON Duality Views</strong> solve this. They give you <em>both representations simultaneously</em> from the same underlying data. Think of it like looking at a sculpture from two angles — same object, different views.
           </p>
           <p className="text-muted-foreground mb-4">
-            Below is a live example. On the left, data lives in a <span className="text-relational">relational table</span>. On the right, the same data is exposed as a <span className="text-json">JSON document</span>. <strong>Click any name</strong> in either view to edit it, and watch the other side update instantly.
+            Below is a live example. On the left, data lives in a <span className="text-relational">relational table</span>. On the right, the same data is exposed as a <span className="text-json">JSON document</span>. <strong>Click any name</strong> in either view to edit it, and watch the other side update instantly. You can even have <em>multiple</em> duality views on the same table — try <strong>Both Views</strong> to see an <span className="text-cyan-400">employee-centric</span> and a <span className="text-emerald-400">department-centric</span> JSON shape update simultaneously from one table change.
           </p>
           <JsonDualityWidget />
         </section>
@@ -206,6 +209,21 @@ export default function Home() {
           </p>
         </section>
 
+        {/* ===== Deep Data Security Section ===== */}
+        <section id="security" className="reveal">
+          <h2 className="text-3xl font-bold leading-tight mt-14 mb-4">Deep Data Security for Vector Search</h2>
+          <p className="text-muted-foreground mb-4">
+            Vector databases typically have no concept of <em>row-level security</em>. If you can query, you can see everything. Oracle AI Database applies <strong>Deep Data Security</strong> policies directly to vector operations — similarity search results are automatically filtered based on the user&apos;s security clearance.
+          </p>
+          <p className="text-muted-foreground mb-4">
+            Switch between user roles below and <strong>click anywhere</strong> to run a similarity search. Notice how the same query returns different results depending on who is logged in — and some nearby vectors are completely invisible. The database enforces this at the storage level, not the application layer.
+          </p>
+          <DeepSecurityWidget />
+          <p className="text-muted-foreground mb-4">
+            This is critical for enterprises: HR data, financial reports, and legal documents can all live in the same vector store and participate in the same similarity searches — but each user only ever sees what their security label permits. No application-level filtering required.
+          </p>
+        </section>
+
         {/* ===== ONNX In-DB Section ===== */}
         <section id="onnx" className="reveal">
           <h2 className="text-3xl font-bold leading-tight mt-14 mb-4">Neural Networks inside the Database</h2>
@@ -240,7 +258,7 @@ export default function Home() {
         <section>
           <h2 className="text-3xl font-bold leading-tight mt-14 mb-4">The convergence advantage</h2>
           <p className="text-muted-foreground mb-4">
-            What makes Oracle AI Database unique is that <span className="text-relational">relational</span>, <span className="text-json">JSON</span>, <span className="text-graph">graph</span>, and <span className="text-vector">vector</span> operations all happen in the <strong>same engine, on the same data</strong>. Add <span className="text-hnsw">HNSW indexing</span> for scale, <span className="text-rag">RAG pipelines</span> for AI applications, <span className="text-onnx">in-database ML inference</span> for simplicity, and <span className="text-acid">ACID transactions</span> for production reliability.
+            What makes Oracle AI Database unique is that <span className="text-relational">relational</span>, <span className="text-json">JSON</span>, <span className="text-graph">graph</span>, <span className="text-vector">vector</span>, and beyond (XML, Text, Spatial, RDF) all happen in the <strong>same engine, on the same data</strong>. Add <span className="text-hnsw">HNSW indexing</span> for scale, <span className="text-rag">RAG pipelines</span> for AI applications, <span className="text-onnx">in-database ML inference</span> for simplicity, and <span className="text-acid">ACID transactions</span> for production reliability.
           </p>
           <p className="text-muted-foreground mb-4">
             This isn&apos;t just convenient — it&apos;s a fundamental architectural advantage. When your AI application needs to combine semantic search with structured filters, relationship traversals, and ML inference, Oracle AI Database handles it all natively, in a single SQL query, with full transactional guarantees.
@@ -256,7 +274,7 @@ export default function Home() {
             <span className="font-semibold">Oracle AI Database</span>
           </div>
           <p className="text-muted-foreground text-sm mb-3">
-            9 interactive explorations: JSON Duality Views, Cascading Updates, Property Graphs, Vector Search, HNSW Indexing, RAG Pipelines, ACID Transactions, In-Database ONNX, and SQL/JSON Path.
+            10 interactive explorations: JSON Duality Views, Cascading Updates, Property Graphs, Vector Search, HNSW Indexing, RAG Pipelines, ACID Transactions, Deep Data Security, In-Database ONNX, and SQL/JSON Path.
           </p>
           <p className="text-muted-foreground text-xs">
             Inspired by the visual style of educational technical blogs. Built with Next.js + React + TypeScript.
