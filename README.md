@@ -1,6 +1,6 @@
 # Oracle AI Database: From the Ground Up
 
-An interactive showcase of Oracle Database 23ai features, built as a single-page static site. 9 hands-on widgets let you poke at the core capabilities: JSON Duality Views, property graphs, vector search, HNSW indexing, RAG pipelines, ACID transactions, in-database ML inference, and SQL/JSON path queries.
+An interactive showcase of Oracle AI Database features, built as a single-page static site. 9 hands-on widgets let you poke at the core capabilities: JSON Duality Views, property graphs, vector search, HNSW indexing, RAG pipelines, ACID transactions, in-database ML inference, and SQL/JSON path queries.
 
 **[Live Demo](https://jasperan.github.io/visual-oracledb/)**
 

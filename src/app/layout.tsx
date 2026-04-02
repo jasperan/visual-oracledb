@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Oracle AI Database - From the Ground Up",
-  description: "An interactive exploration of Oracle Database 23ai capabilities - JSON Duality Views, Property Graphs, and Vector Search",
+  description: "An interactive exploration of Oracle AI Database capabilities - JSON Duality Views, Property Graphs, and Vector Search",
 };
 
 export default function RootLayout({
