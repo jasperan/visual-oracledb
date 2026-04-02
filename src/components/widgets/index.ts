@@ -8,3 +8,4 @@ export { AcidRaceWidget } from "./AcidRaceWidget";
 export { OnnxInDbWidget } from "./OnnxInDbWidget";
 export { JsonPathWidget } from "./JsonPathWidget";
 export { DeepSecurityWidget } from "./DeepSecurityWidget";
+export { RacWidget } from "./RacWidget";

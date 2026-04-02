@@ -12,6 +12,7 @@ import {
   DeepSecurityWidget,
   OnnxInDbWidget,
   JsonPathWidget,
+  RacWidget,
 } from "@/components/widgets";
 
 export default function Home() {
@@ -50,6 +51,7 @@ export default function Home() {
           <a href="#security" className="text-muted-foreground no-underline text-xs md:text-sm font-medium hover:text-foreground transition-colors">Security</a>
           <a href="#onnx" className="text-muted-foreground no-underline text-xs md:text-sm font-medium hover:text-foreground transition-colors">ONNX</a>
           <a href="#jsonpath" className="text-muted-foreground no-underline text-xs md:text-sm font-medium hover:text-foreground transition-colors">JSON Path</a>
+          <a href="#rac" className="text-muted-foreground no-underline text-xs md:text-sm font-medium hover:text-foreground transition-colors">RAC</a>
         </div>
       </nav>
 
@@ -95,6 +97,7 @@ export default function Home() {
             <li><a href="#security" className="text-muted-foreground no-underline hover:text-cyan-400">How Deep Data Security protects vector search results</a></li>
             <li><a href="#onnx" className="text-muted-foreground no-underline hover:text-cyan-400">Running neural network inference inside the database</a></li>
             <li><a href="#jsonpath" className="text-muted-foreground no-underline hover:text-cyan-400">Querying JSON documents with SQL/JSON path expressions</a></li>
+            <li><a href="#rac" className="text-muted-foreground no-underline hover:text-cyan-400">How Oracle RAC delivers linear scalability and zero-downtime operations</a></li>
           </ul>
         </div>
 
@@ -254,6 +257,24 @@ export default function Home() {
           </p>
         </section>
 
+        {/* ===== Oracle RAC Section ===== */}
+        <section id="rac" className="reveal">
+          <h2 className="text-3xl font-bold leading-tight mt-14 mb-4">Oracle RAC: Scalability and Resilience</h2>
+          <p className="text-muted-foreground mb-4">
+            <strong>Oracle RAC</strong> (Real Application Clusters) provides the foundation for running Oracle AI Database at scale. Multiple <span className="text-cyan-400">active-active</span> instances share the same storage, each capable of reading and writing simultaneously — delivering linear scalability and near-zero downtime.
+          </p>
+          <p className="text-muted-foreground mb-4">
+            With over two decades of innovation, RAC 26ai introduces <span className="text-emerald-400">Smart Connection Rebalancing</span> for dynamic workload optimization, <span className="text-amber-400">linear scaling of AI vector search</span> across instances, <span className="text-purple-400">Two-Stage Rolling Patching</span> for zero-downtime updates, and <span className="text-pink-400">Fast Start Reconfiguration</span> that resumes work 6x faster after failures.
+          </p>
+          <p className="text-muted-foreground mb-4">
+            Explore each capability below. <strong>Cluster Architecture</strong> shows the active-active design with Cache Fusion. <strong>Smart Rebalancing</strong> demonstrates workload-aware session routing. <strong>Linear Scalability</strong> uses real GloVe-25 benchmark numbers. <strong>Zero-Downtime Recovery</strong> lets you crash an instance and watch recovery.
+          </p>
+          <RacWidget />
+          <p className="text-muted-foreground mb-4">
+            Oracle RAC is the ideal platform for AI workloads: isolate CPU-intensive vector search on dedicated instances while OLTP continues uninterrupted on others. The shared-storage architecture means every instance sees the same data — including HNSW indexes — enabling distributed similarity search at scale.
+          </p>
+        </section>
+
         {/* ===== Conclusion ===== */}
         <section>
           <h2 className="text-3xl font-bold leading-tight mt-14 mb-4">The convergence advantage</h2>
@@ -274,7 +295,7 @@ export default function Home() {
             <span className="font-semibold">Oracle AI Database</span>
           </div>
           <p className="text-muted-foreground text-sm mb-3">
-            10 interactive explorations: JSON Duality Views, Cascading Updates, Property Graphs, Vector Search, HNSW Indexing, RAG Pipelines, ACID Transactions, Deep Data Security, In-Database ONNX, and SQL/JSON Path.
+            11 interactive explorations: JSON Duality Views, Cascading Updates, Property Graphs, Vector Search, HNSW Indexing, RAG Pipelines, ACID Transactions, Deep Data Security, In-Database ONNX, SQL/JSON Path, and Oracle RAC.
           </p>
           <p className="text-muted-foreground text-xs">
             Inspired by the visual style of educational technical blogs. Built with Next.js + React + TypeScript.

@@ -131,6 +131,39 @@ FROM GRAPH_TABLE ( movie_graph
 );`;
 }
 
+type LayoutType = "force" | "circular" | "hierarchical";
+
+function applyCircularLayout(nodes: GraphNode[]): GraphNode[] {
+  const cx = 340, cy = 250, r = 180;
+  return nodes.map((n, i) => {
+    const angle = (i / nodes.length) * Math.PI * 2 - Math.PI / 2;
+    return { ...n, x: cx + Math.cos(angle) * r, y: cy + Math.sin(angle) * r, vx: 0, vy: 0 };
+  });
+}
+
+function applyHierarchicalLayout(nodes: GraphNode[]): GraphNode[] {
+  // Group by type into columns: person → movie → review/award/studio
+  const columns: Record<string, string[]> = {
+    person: [], movie: [], other: [],
+  };
+  for (const n of nodes) {
+    if (n.type === "person") columns.person.push(n.id);
+    else if (n.type === "movie") columns.movie.push(n.id);
+    else columns.other.push(n.id);
+  }
+  const colX = [120, 340, 560];
+  return nodes.map((n) => {
+    let col = 2;
+    let idx = columns.other.indexOf(n.id);
+    if (columns.person.includes(n.id)) { col = 0; idx = columns.person.indexOf(n.id); }
+    else if (columns.movie.includes(n.id)) { col = 1; idx = columns.movie.indexOf(n.id); }
+    const list = col === 0 ? columns.person : col === 1 ? columns.movie : columns.other;
+    const totalH = (list.length - 1) * 80;
+    const startY = 250 - totalH / 2;
+    return { ...n, x: colX[col], y: startY + idx * 80, vx: 0, vy: 0 };
+  });
+}
+
 export function PropertyGraphWidget() {
   const [nodes, setNodes] = useState<GraphNode[]>(() =>
     initialNodes.map((n) => ({ ...n, vx: 0, vy: 0 }))
@@ -142,6 +175,9 @@ export function PropertyGraphWidget() {
   const [shortestPath, setShortestPath] = useState<string[] | null>(null);
   const [showQuery, setShowQuery] = useState(true);
   const [draggedNode, setDraggedNode] = useState<string | null>(null);
+  const [layout, setLayout] = useState<LayoutType>("force");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [focusedNode, setFocusedNode] = useState<string | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const simRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const simTickRef = useRef(0);
@@ -160,6 +196,40 @@ export function PropertyGraphWidget() {
 
   // Ref to track which node is currently being dragged (avoids stale closures in sim)
   const draggedNodeRef = useRef<string | null>(null);
+
+  // Apply layout changes
+  const switchLayout = useCallback((newLayout: LayoutType) => {
+    setLayout(newLayout);
+    if (newLayout === "circular") {
+      setNodes((prev) => applyCircularLayout(prev));
+      if (simRef.current) clearInterval(simRef.current);
+    } else if (newLayout === "hierarchical") {
+      setNodes((prev) => applyHierarchicalLayout(prev));
+      if (simRef.current) clearInterval(simRef.current);
+    } else {
+      // Force — reheat the simulation
+      simTickRef.current = 0;
+    }
+  }, []);
+
+  // Focus mode: double-click a node to zoom into its neighborhood
+  const handleNodeDoubleClick = useCallback((nodeId: string) => {
+    if (focusedNode === nodeId) {
+      setFocusedNode(null); // unfocus
+    } else {
+      setFocusedNode(nodeId);
+    }
+  }, [focusedNode]);
+
+  // Get focused neighborhood (node + 1-hop neighbors)
+  const focusedNeighborIds = focusedNode
+    ? new Set([
+        focusedNode,
+        ...graphEdges
+          .filter((e) => e.from === focusedNode || e.to === focusedNode)
+          .flatMap((e) => [e.from, e.to]),
+      ])
+    : null;
 
   // Force simulation on mount
   useEffect(() => {
@@ -307,7 +377,22 @@ export function PropertyGraphWidget() {
     if (filter === "person") return n.type === "person";
     if (filter === "movie") return n.type === "movie";
     return true;
+  }).filter((n) => {
+    // Focus mode: only show the focused node and its neighbors
+    if (focusedNeighborIds && !focusedNeighborIds.has(n.id)) return false;
+    return true;
   });
+
+  // Search matching
+  const searchMatchIds = searchTerm.length >= 2
+    ? new Set(nodes.filter((n) => {
+        const term = searchTerm.toLowerCase();
+        return n.label.toLowerCase().includes(term)
+          || (n.sublabel?.toLowerCase().includes(term) ?? false)
+          || n.type.toLowerCase().includes(term)
+          || Object.values(n.props).some((v) => String(v).toLowerCase().includes(term));
+      }).map((n) => n.id))
+    : null;
 
   const visibleNodeIds = new Set(filteredNodes.map((n) => n.id));
   const pathEdgeSet = new Set<string>();
@@ -439,13 +524,22 @@ export function PropertyGraphWidget() {
                 key={node.id}
                 className="graph-node"
                 style={{
-                  opacity: (selectedNodes.length > 0 || shortestPath) && !active && !isPathNode ? 0.25 : 1,
+                  opacity: searchMatchIds && !searchMatchIds.has(node.id)
+                    ? 0.15
+                    : (selectedNodes.length > 0 || shortestPath) && !active && !isPathNode ? 0.25 : 1,
                   cursor: draggedNode === node.id ? "grabbing" : "grab",
                 }}
                 onMouseEnter={() => { if (!draggedNodeRef.current) setHoveredNode(node.id); }}
                 onMouseLeave={() => { if (!draggedNodeRef.current) setHoveredNode(null); }}
                 onMouseDown={(e) => handleNodeMouseDown(e, node.id)}
+                onDoubleClick={() => handleNodeDoubleClick(node.id)}
               >
+                {/* Search match ring */}
+                {searchMatchIds?.has(node.id) && (
+                  <circle cx={node.x} cy={node.y} r={radius + 8} fill="none" stroke="#22d3ee" strokeWidth={2} opacity={0.6}>
+                    <animate attributeName="r" values={`${radius + 6};${radius + 10};${radius + 6}`} dur="1.5s" repeatCount="indefinite" />
+                  </circle>
+                )}
                 {/* Selection ring */}
                 {isSelected && (
                   <circle cx={node.x} cy={node.y} r={radius + 5} fill="none" stroke="#fff" strokeWidth={2} strokeDasharray="4 2" />
@@ -505,8 +599,24 @@ export function PropertyGraphWidget() {
         </div>
       )}
 
-      {/* Controls */}
+      {/* Layout + Search controls */}
       <div className="flex gap-2 mt-4 flex-wrap items-center">
+        <span className="font-mono text-xs text-muted-foreground">Layout:</span>
+        <button onClick={() => switchLayout("force")} className={`btn-mono ${layout === "force" ? "active" : ""}`}>Force</button>
+        <button onClick={() => switchLayout("circular")} className={`btn-mono ${layout === "circular" ? "active" : ""}`}>Circular</button>
+        <button onClick={() => switchLayout("hierarchical")} className={`btn-mono ${layout === "hierarchical" ? "active" : ""}`}>Hierarchical</button>
+        <div className="flex-1" />
+        <input
+          type="text"
+          placeholder="Search nodes..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="bg-black/40 border border-border rounded px-2 py-1 font-mono text-xs text-foreground w-32 outline-none focus:border-cyan-500"
+        />
+      </div>
+
+      {/* Filter + Actions */}
+      <div className="flex gap-2 mt-2 flex-wrap items-center">
         <button onClick={() => setFilter("all")} className={`btn-mono ${filter === "all" ? "active" : ""}`}>Show All</button>
         <button onClick={() => setFilter("person")} className={`btn-mono ${filter === "person" ? "active" : ""}`}>People Only</button>
         <button onClick={() => setFilter("movie")} className={`btn-mono ${filter === "movie" ? "active" : ""}`}>Movies Only</button>
@@ -514,11 +624,16 @@ export function PropertyGraphWidget() {
         <button onClick={() => setShowQuery((v) => !v)} className={`btn-mono ${showQuery ? "active" : ""}`}>
           SQL/PGQ
         </button>
+        {focusedNode && (
+          <button onClick={() => setFocusedNode(null)} className="btn-mono active">
+            Exit Focus
+          </button>
+        )}
         <button
-          onClick={() => { setSelectedNodes([]); setShortestPath(null); }}
+          onClick={() => { setSelectedNodes([]); setShortestPath(null); setFocusedNode(null); setSearchTerm(""); }}
           className="btn-mono"
         >
-          Clear Selection
+          Reset
         </button>
       </div>
 
@@ -531,7 +646,7 @@ export function PropertyGraphWidget() {
           </span>
         ))}
         <span className="text-border">|</span>
-        <span>Click: select. Drag: reposition. Click two: shortest path.</span>
+        <span>Click: select. Drag: reposition. Double-click: focus. Click two: shortest path.</span>
       </div>
     </div>
   );
