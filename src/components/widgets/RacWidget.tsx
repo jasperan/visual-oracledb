@@ -333,105 +333,224 @@ function RebalancePanel() {
 // ============================================================
 // SUB-WIDGET 3: Linear Scalability (GloVe-25 benchmark)
 // ============================================================
+
+// Real GloVe-25 numbers: capacity per N instances
+const CAPACITY: Record<number, number> = {
+  1: 14638,
+  2: 28646,
+  3: 56787,
+  4: 103798,
+  5: 131070,
+};
+
+const INST_COLORS = ["#38bdf8", "#4ade80", "#fbbf24", "#f472b6", "#a78bfa"];
+
 function ScalabilityPanel() {
   const [instanceCount, setInstanceCount] = useState(1);
-  const [animating, setAnimating] = useState(false);
-  const [displayQps, setDisplayQps] = useState(14638);
+  const [workload, setWorkload] = useState(5000); // current demand in qps
+  const [running, setRunning] = useState(false);
+  const [history, setHistory] = useState<{ t: number; qps: number; instances: number; cpu: number }[]>([]);
+  const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const workloadRef = useRef(5000);
+  const instanceRef = useRef(1);
+  const tRef = useRef(0);
 
-  // Real GloVe-25 numbers from the PPT
-  const benchmarks: Record<number, number> = {
-    1: 14638,
-    2: 28646,
-    3: 56787,
-    4: 103798,
-    5: 131070,
-  };
+  workloadRef.current = workload;
+  instanceRef.current = instanceCount;
 
-  const targetQps = benchmarks[instanceCount] ?? instanceCount * 14638;
+  const capacity = CAPACITY[instanceCount] ?? instanceCount * 14638;
+  const cpuPct = Math.min(100, (workload / capacity) * 100);
+  const cpuPerInstance = cpuPct; // simplified: all instances share load equally
+  const needsMoreInstances = cpuPct > 90 && instanceCount < 5;
+  const atMaxCapacity = cpuPct > 85 && instanceCount >= 5;
+  const healthy = !needsMoreInstances && !atMaxCapacity;
+
+  // Increase workload over time
+  const startSimulation = useCallback(() => {
+    if (running) return;
+    setRunning(true);
+    setWorkload(5000);
+    setInstanceCount(1);
+    setHistory([]);
+    workloadRef.current = 5000;
+    instanceRef.current = 1;
+    tRef.current = 0;
+
+    tickRef.current = setInterval(() => {
+      tRef.current++;
+      // Workload ramps up over time
+      const newWorkload = Math.min(140000, 5000 + tRef.current * 800);
+      workloadRef.current = newWorkload;
+      setWorkload(newWorkload);
+
+      const cap = CAPACITY[instanceRef.current] ?? instanceRef.current * 14638;
+      const cpu = Math.min(100, (newWorkload / cap) * 100);
+
+      setHistory((prev) => [
+        ...prev.slice(-40),
+        { t: tRef.current, qps: Math.min(newWorkload, cap), instances: instanceRef.current, cpu },
+      ]);
+
+      if (newWorkload >= 135000) {
+        if (tickRef.current) clearInterval(tickRef.current);
+        setRunning(false);
+      }
+    }, 200);
+  }, [running]);
+
+  const addInstance = useCallback(() => {
+    if (instanceCount >= 5) return;
+    const next = instanceCount + 1;
+    setInstanceCount(next);
+    instanceRef.current = next;
+  }, [instanceCount]);
+
+  const reset = useCallback(() => {
+    if (tickRef.current) clearInterval(tickRef.current);
+    setRunning(false);
+    setWorkload(5000);
+    setInstanceCount(1);
+    setHistory([]);
+    workloadRef.current = 5000;
+    instanceRef.current = 1;
+    tRef.current = 0;
+  }, []);
 
   useEffect(() => {
-    if (displayQps === targetQps) return;
-    setAnimating(true);
-    const diff = targetQps - displayQps;
-    const steps = 30;
-    const increment = diff / steps;
-    let step = 0;
-    const timer = setInterval(() => {
-      step++;
-      if (step >= steps) {
-        setDisplayQps(targetQps);
-        setAnimating(false);
-        clearInterval(timer);
-      } else {
-        setDisplayQps(Math.round(displayQps + increment * step));
-      }
-    }, 20);
-    return () => clearInterval(timer);
-  }, [targetQps, displayQps]);
+    return () => { if (tickRef.current) clearInterval(tickRef.current); };
+  }, []);
 
-  const barMax = 140000;
+  const actualThroughput = Math.min(workload, capacity);
 
   return (
     <div>
-      <div className="flex items-center gap-4 mb-4 flex-wrap">
-        <span className="font-mono text-sm text-muted-foreground">RAC Instances:</span>
-        {[1, 2, 3, 4, 5].map((n) => (
-          <button
-            key={n}
-            onClick={() => setInstanceCount(n)}
-            className={`btn-mono ${instanceCount === n ? "active" : ""}`}
-          >
-            {n}
-          </button>
-        ))}
+      <div className="flex items-center gap-2 mb-4 flex-wrap">
+        <button onClick={startSimulation} disabled={running} className={`btn-mono ${!running ? "active" : ""}`}>
+          {running ? "Workload increasing..." : "Start Simulation"}
+        </button>
+        <button onClick={addInstance} disabled={instanceCount >= 5 || !running} className={`btn-mono ${running && needsMoreInstances ? "active" : ""}`}
+          style={running && needsMoreInstances ? { borderColor: "#ef4444", animation: "pulse 1s infinite" } : {}}
+        >
+          + Add Instance
+        </button>
+        <button onClick={reset} className="btn-mono">Reset</button>
+        <div className="flex-1" />
+        <span className="font-mono text-xs text-muted-foreground">
+          Demand: <span className="text-foreground">{workload.toLocaleString()}</span> qps
+        </span>
       </div>
 
-      {/* Bar chart */}
-      <div className="space-y-3 mb-4">
-        {[1, 2, 3, 4, 5].map((n) => {
-          const qps = benchmarks[n];
-          const isActive = n <= instanceCount;
-          const width = (qps / barMax) * 100;
+      {/* Instance CPU gauges */}
+      <div className={`grid gap-3 mb-4`} style={{ gridTemplateColumns: `repeat(${Math.max(instanceCount, 1)}, 1fr)` }}>
+        {Array.from({ length: instanceCount }, (_, i) => {
+          const instCpu = Math.min(100, cpuPerInstance);
+          const instColor = INST_COLORS[i];
           return (
-            <div key={n} className="flex items-center gap-3">
-              <span className="font-mono text-xs text-muted-foreground w-20">
-                {n} instance{n > 1 ? "s" : ""}
-              </span>
-              <div className="flex-1 h-7 bg-black/40 rounded-md overflow-hidden relative">
+            <div key={i} className="bg-black/40 border border-border rounded-lg p-3 transition-all duration-300">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-mono text-xs" style={{ color: instColor }}>Instance {i + 1}</span>
+                <span className="font-mono text-xs font-bold" style={{ color: instCpu > 90 ? "#ef4444" : instCpu > 70 ? "#fbbf24" : "#4ade80" }}>
+                  {Math.round(instCpu)}%
+                </span>
+              </div>
+              <div className="h-3 bg-black/60 rounded-full overflow-hidden">
                 <div
-                  className="h-full rounded-md transition-all duration-500"
+                  className="h-full rounded-full transition-all duration-300"
                   style={{
-                    width: isActive ? `${width}%` : "0%",
-                    background: isActive
-                      ? `linear-gradient(90deg, #38bdf8, ${n >= 4 ? "#4ade80" : "#38bdf8"})`
-                      : "transparent",
-                    opacity: isActive ? 1 : 0.15,
+                    width: `${instCpu}%`,
+                    background: instCpu > 90 ? "#ef4444" : instCpu > 70 ? `linear-gradient(90deg, ${instColor}, #fbbf24)` : instColor,
                   }}
                 />
-                {isActive && (
-                  <span className="absolute right-2 top-1/2 -translate-y-1/2 font-mono text-xs text-white font-bold">
-                    {qps.toLocaleString()} qps
-                  </span>
-                )}
+              </div>
+              <div className="font-mono text-[10px] text-muted-foreground mt-1">
+                CPU Load
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* Big number */}
-      <div className="text-center mb-4">
-        <div className="font-mono text-4xl font-bold" style={{ color: "#38bdf8" }}>
-          {displayQps.toLocaleString()}
+      {/* Throughput & capacity display */}
+      <div className="grid grid-cols-3 gap-4 mb-4">
+        <div className="text-center">
+          <div className="font-mono text-2xl font-bold" style={{ color: needsMoreInstances ? "#ef4444" : "#38bdf8" }}>
+            {actualThroughput.toLocaleString()}
+          </div>
+          <div className="font-mono text-[10px] text-muted-foreground">Actual Throughput (qps)</div>
         </div>
-        <div className="font-mono text-sm text-muted-foreground">
-          Vector Distance Queries/sec with {instanceCount} instance{instanceCount > 1 ? "s" : ""}
+        <div className="text-center">
+          <div className="font-mono text-2xl font-bold text-emerald-400">
+            {capacity.toLocaleString()}
+          </div>
+          <div className="font-mono text-[10px] text-muted-foreground">Max Capacity ({instanceCount} inst)</div>
+        </div>
+        <div className="text-center">
+          <div className="font-mono text-2xl font-bold" style={{ color: needsMoreInstances ? "#ef4444" : atMaxCapacity ? "#fbbf24" : "#4ade80" }}>
+            {needsMoreInstances ? "SCALE OUT" : atMaxCapacity ? "AT CAPACITY" : "OK"}
+          </div>
+          <div className="font-mono text-[10px] text-muted-foreground">
+            {needsMoreInstances ? "Add instance to handle load!" : atMaxCapacity ? `${instanceCount} instances handling peak load` : "Headroom available"}
+          </div>
         </div>
       </div>
 
+      {/* Mini throughput chart */}
+      {history.length > 2 && (
+        <div className="bg-black/30 border border-border rounded-lg p-3 mb-4">
+          <div className="font-mono text-[10px] text-muted-foreground mb-2">Throughput over time</div>
+          <svg viewBox={`0 0 400 80`} className="w-full h-20">
+            {/* Capacity line */}
+            {(() => {
+              let lastCap = CAPACITY[1];
+              const segments: { x1: number; x2: number; cap: number }[] = [];
+              for (let i = 0; i < history.length; i++) {
+                const cap = CAPACITY[history[i].instances] ?? history[i].instances * 14638;
+                const x = (i / Math.max(history.length - 1, 1)) * 400;
+                if (cap !== lastCap || i === 0) {
+                  segments.push({ x1: x, x2: x, cap });
+                  lastCap = cap;
+                } else {
+                  segments[segments.length - 1].x2 = x;
+                }
+              }
+              return segments.map((s, idx) => (
+                <line key={idx} x1={s.x1} y1={80 - (s.cap / 140000) * 75} x2={s.x2} y2={80 - (s.cap / 140000) * 75}
+                  stroke="#4ade80" strokeWidth="1" strokeDasharray="3 2" opacity="0.5" />
+              ));
+            })()}
+            {/* Throughput line */}
+            <polyline
+              points={history.map((h, i) => {
+                const x = (i / Math.max(history.length - 1, 1)) * 400;
+                const y = 80 - (h.qps / 140000) * 75;
+                return `${x},${y}`;
+              }).join(" ")}
+              fill="none" stroke="#38bdf8" strokeWidth="2"
+            />
+            {/* Demand line */}
+            <polyline
+              points={history.map((h, i) => {
+                const demand = 5000 + h.t * 800;
+                const x = (i / Math.max(history.length - 1, 1)) * 400;
+                const y = 80 - (Math.min(demand, 140000) / 140000) * 75;
+                return `${x},${y}`;
+              }).join(" ")}
+              fill="none" stroke="#f87171" strokeWidth="1" strokeDasharray="4 2" opacity="0.6"
+            />
+          </svg>
+          <div className="flex justify-between font-mono text-[10px] text-muted-foreground mt-1">
+            <div className="flex gap-3">
+              <span className="flex items-center gap-1"><span className="inline-block w-3 h-0.5 bg-sky-400" /> Throughput</span>
+              <span className="flex items-center gap-1"><span className="inline-block w-3 h-0.5 bg-red-400 opacity-60" style={{ borderTop: "1px dashed" }} /> Demand</span>
+              <span className="flex items-center gap-1"><span className="inline-block w-3 h-0.5 bg-emerald-400 opacity-50" style={{ borderTop: "1px dashed" }} /> Capacity</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="bg-black/30 border border-border rounded-lg p-3 font-mono text-xs text-muted-foreground">
         <strong>Dataset:</strong> GloVe-25 — 1.2M rows, VECTOR(25, FLOAT32). ~99% of query time is CPU.{" "}
-        Oracle RAC scales vector search <span className="text-emerald-400">linearly</span> across instances — add nodes, get proportional throughput.
+        As demand grows, <span className="text-emerald-400">add instances</span> to scale linearly. Watch the CPU drop and capacity jump with each new instance.
       </div>
     </div>
   );
