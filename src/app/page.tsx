@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   JsonDualityWidget,
   CascadeWidget,
@@ -15,294 +15,429 @@ import {
   RacWidget,
 } from "@/components/widgets";
 
+const SECTIONS = [
+  { id: "duality", short: "Duality", full: "JSON Duality Views", num: "01" },
+  { id: "cascade", short: "Cascade", full: "Cascading updates", num: "02" },
+  { id: "graphs", short: "Graphs", full: "Property Graphs", num: "03" },
+  { id: "vectors", short: "Vectors", full: "Similarity Search", num: "04" },
+  { id: "hnsw", short: "HNSW", full: "HNSW Indexing", num: "05" },
+  { id: "rag", short: "RAG", full: "RAG Pipelines", num: "06" },
+  { id: "acid", short: "ACID", full: "ACID Transactions", num: "07" },
+  { id: "security", short: "Security", full: "Deep Data Security", num: "08" },
+  { id: "onnx", short: "ONNX", full: "In-database ML", num: "09" },
+  { id: "jsonpath", short: "JSON Path", full: "SQL/JSON Path", num: "10" },
+  { id: "rac", short: "RAC", full: "Real Application Clusters", num: "11" },
+];
+
 export default function Home() {
+  const [activeSection, setActiveSection] = useState("");
+
   useEffect(() => {
-    const observer = new IntersectionObserver(
+    const revealObs = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("visible");
-          }
+        entries.forEach((e) => {
+          if (e.isIntersecting) e.target.classList.add("visible");
         });
       },
-      { threshold: 0.1, rootMargin: "0px 0px -50px 0px" }
+      { threshold: 0.08, rootMargin: "0px 0px -40px 0px" }
     );
-    document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
+    document.querySelectorAll(".v2 .reveal").forEach((el) => revealObs.observe(el));
+
+    const sectionObs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) setActiveSection(e.target.id);
+        });
+      },
+      { threshold: 0.15, rootMargin: "-15% 0px -65% 0px" }
+    );
+    SECTIONS.forEach(({ id }) => {
+      const el = document.getElementById(id);
+      if (el) sectionObs.observe(el);
+    });
+
+    return () => {
+      revealObs.disconnect();
+      sectionObs.disconnect();
+    };
   }, []);
 
   return (
-    <main>
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-background/85 backdrop-blur-xl border-b border-border px-4 md:px-6 py-3 flex items-center gap-4">
-        <a href="#" className="flex items-center gap-2 font-bold text-foreground no-underline shrink-0">
-          <div className="w-7 h-7 rounded-md flex items-center justify-center font-extrabold text-white text-sm" style={{ background: "#C74634" }}>
+    <div className="v2 bg-background text-foreground min-h-dvh">
+      <div className="v2-grain" aria-hidden="true" />
+
+      <a
+        href="#content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[300] focus:bg-background focus:text-foreground focus:px-4 focus:py-2 focus:rounded-md focus:ring-2 focus:ring-[#C74634]"
+      >
+        Skip to content
+      </a>
+
+      {/* Nav */}
+      <nav className="sticky top-0 z-50 bg-background/92 backdrop-blur-lg px-6 py-3 flex items-center gap-6 border-b border-[rgba(255,255,255,0.05)]">
+        <a href="#" className="flex items-center gap-2.5 shrink-0 group no-underline">
+          <div className="w-7 h-7 rounded-md flex items-center justify-center font-extrabold text-white text-sm bg-[#C74634] group-hover:scale-105 transition-transform">
             O
           </div>
-          <span className="hidden md:inline text-sm font-semibold">Oracle AI Database</span>
+          <span className="hidden md:inline text-sm font-semibold tracking-tight text-foreground">Oracle AI Database</span>
         </a>
-        <div className="flex gap-3 md:gap-4 overflow-x-auto whitespace-nowrap scrollbar-hide ml-auto">
-          <a href="v2" className="text-purple-400/80 no-underline text-xs font-medium hover:text-purple-300 transition-colors shrink-0 border border-purple-400/20 rounded-full px-2.5 py-0.5">v2 &rarr;</a>
-          <a href="#duality" className="text-muted-foreground no-underline text-xs md:text-sm font-medium hover:text-foreground transition-colors">Duality</a>
-          <a href="#graphs" className="text-muted-foreground no-underline text-xs md:text-sm font-medium hover:text-foreground transition-colors">Graphs</a>
-          <a href="#vectors" className="text-muted-foreground no-underline text-xs md:text-sm font-medium hover:text-foreground transition-colors">Vectors</a>
-          <a href="#hnsw" className="text-muted-foreground no-underline text-xs md:text-sm font-medium hover:text-foreground transition-colors">HNSW</a>
-          <a href="#rag" className="text-muted-foreground no-underline text-xs md:text-sm font-medium hover:text-foreground transition-colors">RAG</a>
-          <a href="#acid" className="text-muted-foreground no-underline text-xs md:text-sm font-medium hover:text-foreground transition-colors">ACID</a>
-          <a href="#security" className="text-muted-foreground no-underline text-xs md:text-sm font-medium hover:text-foreground transition-colors">Security</a>
-          <a href="#onnx" className="text-muted-foreground no-underline text-xs md:text-sm font-medium hover:text-foreground transition-colors">ONNX</a>
-          <a href="#jsonpath" className="text-muted-foreground no-underline text-xs md:text-sm font-medium hover:text-foreground transition-colors">JSON Path</a>
-          <a href="#rac" className="text-muted-foreground no-underline text-xs md:text-sm font-medium hover:text-foreground transition-colors">RAC</a>
+
+        <div className="flex gap-3.5 md:gap-4 overflow-x-auto whitespace-nowrap scrollbar-hide ml-auto items-center">
+          {SECTIONS.map(({ id, short }) => (
+            <a
+              key={id}
+              href={`#${id}`}
+              className={`v2-nav-link text-xs font-medium no-underline transition-colors pb-0.5 ${
+                activeSection === id
+                  ? "text-foreground active"
+                  : "text-[#6b6d7a] hover:text-foreground"
+              }`}
+            >
+              {short}
+            </a>
+          ))}
         </div>
       </nav>
 
       {/* Hero */}
-      <div className="relative overflow-hidden py-16 px-6 hero-gradient">
-        <div className="hero-glow" />
-        <div className="max-w-3xl mx-auto relative">
-          <div className="flex items-center gap-3 mb-8 text-sm">
-            <span className="text-muted-foreground">MAR 31, 2026</span>
-            <span className="text-muted-foreground">·</span>
-            <span className="text-muted-foreground">Interactive Guide</span>
-            <span className="text-muted-foreground">·</span>
-            <span className="bg-purple-500/15 text-purple-300 px-2 py-0.5 rounded text-xs font-semibold uppercase">
-              AI Database
-            </span>
+      <header className="v2-hero relative overflow-hidden px-6 pt-20 pb-14 md:pt-28 md:pb-20">
+        <div className="v2-hero-glow" aria-hidden="true" />
+        <div className="v2-hero-grid" aria-hidden="true" />
+        <div className="max-w-4xl mx-auto relative">
+          <div className="flex items-center gap-3 mb-10">
+            <span className="text-xs font-medium tracking-[0.12em] uppercase text-[#6b6d7a]">Apr 2026</span>
+            <span className="w-1 h-1 rounded-full bg-[#6b6d7a]/40" />
+            <span className="text-xs font-medium tracking-[0.12em] uppercase text-[#6b6d7a]">Interactive guide</span>
           </div>
-          <h1 className="text-3xl md:text-5xl font-extrabold leading-tight tracking-tight mb-4">
-            Oracle AI Database<br />from the ground up
+          <h1 className="v2-display text-5xl md:text-7xl lg:text-[5.5rem] font-black leading-[0.88] tracking-[-0.04em] mb-8 text-foreground">
+            Oracle AI<br />Database
           </h1>
-          <p className="text-lg text-muted-foreground max-w-xl">
-            Oracle AI Database converges <span className="text-relational">relational</span>,{" "}
-            <span className="text-json">JSON</span>, <span className="text-graph">graph</span>,{" "}
-            <span className="text-vector">vector</span>, and more (XML, Text, Spatial, RDF) into a single engine — with <span className="text-rag">RAG pipelines</span>,{" "}
-            <span className="text-hnsw">HNSW indexing</span>, <span className="text-onnx">in-database ML</span>, and{" "}
-            <span className="text-acid">ACID guarantees</span>. Let&apos;s explore each capability interactively.
+          <p className="text-lg md:text-xl text-[#8b8d9a] max-w-lg leading-relaxed" style={{ textWrap: "pretty" }}>
+            Relational, JSON, graph, vector, and more converged in a single engine.
+            Explore each capability through 11 interactive demos.
           </p>
         </div>
-      </div>
+      </header>
 
       {/* Content */}
-      <div className="max-w-3xl mx-auto px-6 pb-24">
-        {/* Table of Contents */}
-        <div className="bg-card border border-border rounded-xl p-6 my-8">
-          <h4 className="font-semibold mb-3">In this post, you are going to learn:</h4>
-          <ul className="list-disc pl-5 space-y-1">
-            <li><a href="#duality" className="text-muted-foreground no-underline hover:text-cyan-400">How JSON Duality Views unify relational tables and JSON documents</a></li>
-            <li><a href="#cascade" className="text-muted-foreground no-underline hover:text-cyan-400">How cascading updates propagate across dual views in real time</a></li>
-            <li><a href="#graphs" className="text-muted-foreground no-underline hover:text-cyan-400">What property graphs are and how they model relationships</a></li>
-            <li><a href="#vectors" className="text-muted-foreground no-underline hover:text-cyan-400">How similarity search works, simplified to 3D space</a></li>
-            <li><a href="#hnsw" className="text-muted-foreground no-underline hover:text-cyan-400">How HNSW indexes achieve O(log n) similarity search</a></li>
-            <li><a href="#rag" className="text-muted-foreground no-underline hover:text-cyan-400">How RAG pipelines combine vector search with language models</a></li>
-            <li><a href="#acid" className="text-muted-foreground no-underline hover:text-cyan-400">Why ACID transactions matter for AI workloads</a></li>
-            <li><a href="#security" className="text-muted-foreground no-underline hover:text-cyan-400">How Deep Data Security protects vector search results</a></li>
-            <li><a href="#onnx" className="text-muted-foreground no-underline hover:text-cyan-400">Running neural network inference inside the database</a></li>
-            <li><a href="#jsonpath" className="text-muted-foreground no-underline hover:text-cyan-400">Querying JSON documents with SQL/JSON path expressions</a></li>
-            <li><a href="#rac" className="text-muted-foreground no-underline hover:text-cyan-400">How Oracle RAC delivers linear scalability and zero-downtime operations</a></li>
-          </ul>
+      <div id="content" className="max-w-4xl mx-auto px-6 pb-28">
+
+        {/* TOC */}
+        <div className="py-8 mb-4 border-y border-[rgba(255,255,255,0.06)]">
+          <p className="text-xs font-medium tracking-[0.1em] uppercase text-[#6b6d7a] mb-5">Contents</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-1">
+            {SECTIONS.map(({ id, full, num }) => (
+              <a
+                key={id}
+                href={`#${id}`}
+                className="flex items-center gap-3 py-1.5 text-sm text-[#8b8d9a] hover:text-foreground transition-colors group no-underline"
+              >
+                <span className="font-mono text-xs text-[#C74634]/50 group-hover:text-[#C74634] transition-colors w-5">{num}</span>
+                <span>{full}</span>
+              </a>
+            ))}
+          </div>
         </div>
 
-        {/* ===== JSON Duality Section ===== */}
-        <section id="duality" className="reveal">
-          <h2 className="text-3xl font-bold leading-tight mt-14 mb-4">What are JSON Duality Views?</h2>
-          <p className="text-muted-foreground mb-4">
-            Relational databases store data in <span className="text-relational">tables</span> — rows and columns with strict schemas. Document databases store data as flexible <span className="text-json">JSON documents</span>. Developers have been forced to choose one or the other, or glue them together with complex ORM layers.
-          </p>
-          <p className="text-muted-foreground mb-4">
-            <strong>JSON Duality Views</strong> solve this. They give you <em>both representations simultaneously</em> from the same underlying data. Think of it like looking at a sculpture from two angles — same object, different views.
-          </p>
-          <p className="text-muted-foreground mb-4">
-            Below is a live example. On the left, data lives in a <span className="text-relational">relational table</span>. On the right, the same data is exposed as a <span className="text-json">JSON document</span>. <strong>Click any name</strong> in either view to edit it, and watch the other side update instantly. You can even have <em>multiple</em> duality views on the same table — try <strong>Both Views</strong> to see an <span className="text-cyan-400">employee-centric</span> and a <span className="text-emerald-400">department-centric</span> JSON shape update simultaneously from one table change.
-          </p>
-          <JsonDualityWidget />
+        {/* ===== 01 JSON Duality ===== */}
+        <section id="duality" className="reveal v2-section">
+          <div className="v2-divider" />
+          <div className="flex items-start gap-4 mb-5">
+            <span className="v2-section-num mt-1.5">01</span>
+            <h2 className="v2-heading text-2xl md:text-4xl font-bold">What are JSON Duality Views?</h2>
+          </div>
+          <div className="max-w-2xl">
+            <p className="text-[#8b8d9a] mb-4 leading-relaxed">
+              Relational databases store data in <span className="text-relational">tables</span> (rows and columns, strict schemas). Document databases store data as flexible <span className="text-json">JSON documents</span>. Developers have been forced to pick one, or glue them together with complex ORM layers.
+            </p>
+            <p className="text-[#8b8d9a] mb-4 leading-relaxed">
+              <strong className="text-foreground">JSON Duality Views</strong> give you both representations simultaneously from the same underlying data. Same object, different views.
+            </p>
+            <p className="text-[#8b8d9a] mb-4 leading-relaxed">
+              Below, data lives in a <span className="text-relational">relational table</span> on the left and appears as a <span className="text-json">JSON document</span> on the right. <strong className="text-foreground">Click any name</strong> to edit it and watch the other side update instantly. Try <strong className="text-foreground">Both Views</strong> to see an employee-centric and department-centric JSON shape update simultaneously from one table change.
+            </p>
+          </div>
+          <div className="v2-widget-frame my-8">
+            <JsonDualityWidget />
+          </div>
         </section>
 
-        {/* ===== Cascading Updates Section ===== */}
-        <section id="cascade" className="reveal">
-          <h2 className="text-3xl font-bold leading-tight mt-14 mb-4">How cascading updates propagate</h2>
-          <p className="text-muted-foreground mb-4">
-            The real magic happens when data has <em>relationships</em>. In a duality view, updating a <span className="text-keyword">foreign key</span> in the relational side automatically restructures the JSON document.
-          </p>
-          <p className="text-muted-foreground mb-4">
-            Play with the slider below. It controls the <span className="text-relational">department_id</span> of employee &quot;Alice&quot;. Watch how the JSON document restructures itself — the <span className="text-json">department</span> nested object changes, and the <span className="text-relational">relational row</span> updates simultaneously.
-          </p>
-          <CascadeWidget />
-          <p className="text-muted-foreground mb-4">
-            Notice how when you change the <code className="bg-white/5 px-1 rounded text-sm">dept_id</code> from <code className="bg-white/5 px-1 rounded text-sm">1</code> to <code className="bg-white/5 px-1 rounded text-sm">2</code>, the nested JSON object transforms from <span className="text-json">&quot;Engineering&quot;</span> to <span className="text-json">&quot;Marketing&quot;</span>. The database resolves the foreign key relationship and produces the correct document shape — no application code needed.
-          </p>
+        {/* ===== 02 Cascading Updates ===== */}
+        <section id="cascade" className="reveal v2-section">
+          <div className="v2-divider" />
+          <div className="flex items-start gap-4 mb-5">
+            <span className="v2-section-num mt-1.5">02</span>
+            <h2 className="v2-heading text-2xl md:text-4xl font-bold">How cascading updates propagate</h2>
+          </div>
+          <div className="max-w-2xl">
+            <p className="text-[#8b8d9a] mb-4 leading-relaxed">
+              The real magic happens with <em>relationships</em>. Updating a <span className="text-keyword">foreign key</span> in the relational side automatically restructures the JSON document.
+            </p>
+            <p className="text-[#8b8d9a] mb-4 leading-relaxed">
+              The slider below controls the <span className="text-relational">department_id</span> of employee &quot;Alice&quot;. Watch how the JSON document restructures itself as the relational row updates simultaneously.
+            </p>
+          </div>
+          <div className="v2-widget-frame my-8">
+            <CascadeWidget />
+          </div>
+          <div className="max-w-2xl">
+            <p className="text-[#8b8d9a] leading-relaxed">
+              When <code className="v2-code">dept_id</code> changes from <code className="v2-code">1</code> to <code className="v2-code">2</code>, the nested JSON object transforms from <span className="text-json">&quot;Engineering&quot;</span> to <span className="text-json">&quot;Marketing&quot;</span>. The database resolves the foreign key relationship and produces the correct document shape, no application code needed.
+            </p>
+          </div>
         </section>
 
-        {/* ===== Property Graphs Section ===== */}
-        <section id="graphs" className="reveal">
-          <h2 className="text-3xl font-bold leading-tight mt-14 mb-4">What are Property Graphs?</h2>
-          <p className="text-muted-foreground mb-4">
-            Some data is inherently about <em>connections</em>. Social networks, supply chains, fraud rings — these are best understood as <span className="text-graph">graphs</span> of entities linked by relationships.
-          </p>
-          <p className="text-muted-foreground mb-4">
-            A <strong>property graph</strong> consists of <span className="text-graph">nodes</span> (entities) and <span className="text-graph">edges</span> (relationships). Both can carry <span className="text-keyword">properties</span> — key-value pairs. Oracle AI Database lets you define property graphs on your relational tables, querying them with the SQL/PGQ standard.
-          </p>
-          <p className="text-muted-foreground mb-4">
-            <strong>Hover</strong> over any node to see its properties and highlight connections. <strong>Click</strong> to lock selection.
-          </p>
-          <PropertyGraphWidget />
-          <p className="text-muted-foreground mb-4">
-            Each <span className="text-graph">green node</span> is a Person, each <span className="text-destructive">red node</span> is a Movie, and each <span className="text-vector">purple node</span> is a Review. Edges encode relationships like <code className="bg-white/5 px-1 rounded text-sm">ACTED_IN</code>, <code className="bg-white/5 px-1 rounded text-sm">DIRECTED</code>, and <code className="bg-white/5 px-1 rounded text-sm">REVIEWS</code>.
-          </p>
+        {/* ===== 03 Property Graphs ===== */}
+        <section id="graphs" className="reveal v2-section">
+          <div className="v2-divider" />
+          <div className="flex items-start gap-4 mb-5">
+            <span className="v2-section-num mt-1.5">03</span>
+            <h2 className="v2-heading text-2xl md:text-4xl font-bold">What are Property Graphs?</h2>
+          </div>
+          <div className="max-w-2xl">
+            <p className="text-[#8b8d9a] mb-4 leading-relaxed">
+              Some data is inherently about <em>connections</em>. Social networks, supply chains, fraud rings are best understood as <span className="text-graph">graphs</span> of entities linked by relationships.
+            </p>
+            <p className="text-[#8b8d9a] mb-4 leading-relaxed">
+              A <strong className="text-foreground">property graph</strong> has <span className="text-graph">nodes</span> (entities) and <span className="text-graph">edges</span> (relationships), both carrying <span className="text-keyword">properties</span> as key-value pairs. Oracle AI Database lets you define property graphs on relational tables, querying them with SQL/PGQ.
+            </p>
+            <p className="text-[#8b8d9a] mb-4 leading-relaxed">
+              <strong className="text-foreground">Hover</strong> over any node to see its properties and highlight connections. <strong className="text-foreground">Click</strong> to lock selection.
+            </p>
+          </div>
+          <div className="v2-widget-frame my-8">
+            <PropertyGraphWidget />
+          </div>
         </section>
 
-        {/* ===== Vector Search Section ===== */}
-        <section id="vectors" className="reveal">
-          <h2 className="text-3xl font-bold leading-tight mt-14 mb-4">How does Similarity Search work?</h2>
-          <p className="text-muted-foreground mb-4">
-            Modern AI models convert text, images, and audio into <span className="text-vector">vectors</span> — arrays of numbers that capture <em>semantic meaning</em>. Similar things end up close together in vector space. Oracle AI Database stores these vectors and finds closest matches via <strong>similarity search</strong>.
-          </p>
-          <p className="text-muted-foreground mb-4">
-            <strong>Click anywhere</strong> in the space to move the <span className="text-purple-400 font-bold">pink query point</span> and watch nearest neighbors update. Use the <strong>k slider</strong> to change how many neighbors to find.
-          </p>
-          <VectorSearchWidget />
-          <p className="text-muted-foreground mb-4">
-            Oracle supports multiple distance metrics: <span className="text-vector">Euclidean</span> (straight-line), <span className="text-vector">Cosine</span> (angular similarity), and <span className="text-vector">Dot Product</span> (direction + magnitude).
-          </p>
+        {/* ===== 04 Vector Search ===== */}
+        <section id="vectors" className="reveal v2-section">
+          <div className="v2-divider" />
+          <div className="flex items-start gap-4 mb-5">
+            <span className="v2-section-num mt-1.5">04</span>
+            <h2 className="v2-heading text-2xl md:text-4xl font-bold">How does Similarity Search work?</h2>
+          </div>
+          <div className="max-w-2xl">
+            <p className="text-[#8b8d9a] mb-4 leading-relaxed">
+              Modern AI models convert text, images, and audio into <span className="text-vector">vectors</span> (arrays of numbers capturing semantic meaning). Similar things end up close together in vector space. Oracle AI Database stores these vectors and finds closest matches via <strong className="text-foreground">similarity search</strong>.
+            </p>
+            <p className="text-[#8b8d9a] mb-4 leading-relaxed">
+              <strong className="text-foreground">Click anywhere</strong> in the space to move the query point and watch nearest neighbors update. Use the <strong className="text-foreground">k slider</strong> to change how many neighbors to find.
+            </p>
+          </div>
+          <div className="v2-widget-frame my-8">
+            <VectorSearchWidget />
+          </div>
+          <div className="max-w-2xl">
+            <p className="text-[#8b8d9a] leading-relaxed">
+              Oracle supports multiple distance metrics: <span className="text-vector">Euclidean</span> (straight-line), <span className="text-vector">Cosine</span> (angular similarity), and <span className="text-vector">Dot Product</span> (direction + magnitude).
+            </p>
+          </div>
         </section>
 
-        {/* ===== HNSW Index Section ===== */}
-        <section id="hnsw" className="reveal">
-          <h2 className="text-3xl font-bold leading-tight mt-14 mb-4">Inside the HNSW Index</h2>
-          <p className="text-muted-foreground mb-4">
-            Brute-force similarity search checks every vector — that&apos;s O(n) and far too slow for millions of vectors. Oracle uses <span className="text-hnsw">HNSW</span> (Hierarchical Navigable Small World) indexes to achieve <span className="text-hnsw">O(log n)</span> approximate nearest neighbor search.
-          </p>
-          <p className="text-muted-foreground mb-4">
-            HNSW builds a multi-layer graph. <strong>Layer 0</strong> contains all points with dense connections. Higher layers contain progressively fewer points with long-range &quot;highway&quot; connections. Searching starts at the top layer and greedily descends, narrowing candidates at each level.
-          </p>
-          <p className="text-muted-foreground mb-4">
-            <strong>Add points</strong> one at a time to watch the index build itself. Then <strong>search</strong> to see the greedy walk traverse layers.
-          </p>
-          <HnswIndexWidget />
-          <p className="text-muted-foreground mb-4">
-            Notice how the search only visits a fraction of nodes compared to brute force. The hierarchical structure means query time grows logarithmically — making billion-scale vector search practical.
-          </p>
+        {/* ===== 05 HNSW ===== */}
+        <section id="hnsw" className="reveal v2-section">
+          <div className="v2-divider" />
+          <div className="flex items-start gap-4 mb-5">
+            <span className="v2-section-num mt-1.5">05</span>
+            <h2 className="v2-heading text-2xl md:text-4xl font-bold">Inside the HNSW Index</h2>
+          </div>
+          <div className="max-w-2xl">
+            <p className="text-[#8b8d9a] mb-4 leading-relaxed">
+              Brute-force similarity search checks every vector, O(n) and far too slow for millions of vectors. Oracle uses <span className="text-hnsw">HNSW</span> (Hierarchical Navigable Small World) indexes to achieve <span className="text-hnsw">O(log n)</span> approximate nearest neighbor search.
+            </p>
+            <p className="text-[#8b8d9a] mb-4 leading-relaxed">
+              HNSW builds a multi-layer graph. <strong className="text-foreground">Layer 0</strong> contains all points with dense connections. Higher layers contain progressively fewer points with long-range &quot;highway&quot; connections. <strong className="text-foreground">Add points</strong> one at a time, then <strong className="text-foreground">search</strong> to see the greedy walk traverse layers.
+            </p>
+          </div>
+          <div className="v2-widget-frame my-8">
+            <HnswIndexWidget />
+          </div>
+          <div className="max-w-2xl">
+            <p className="text-[#8b8d9a] leading-relaxed">
+              The search only visits a fraction of nodes compared to brute force. The hierarchical structure means query time grows logarithmically, making billion-scale vector search practical.
+            </p>
+          </div>
         </section>
 
-        {/* ===== RAG Pipeline Section ===== */}
-        <section id="rag" className="reveal">
-          <h2 className="text-3xl font-bold leading-tight mt-14 mb-4">The RAG Pipeline, demystified</h2>
-          <p className="text-muted-foreground mb-4">
-            <span className="text-rag">Retrieval-Augmented Generation</span> (RAG) is the dominant pattern for building AI applications that need factual, up-to-date answers. Instead of relying solely on the LLM&apos;s training data, RAG retrieves relevant documents and feeds them as context.
-          </p>
-          <p className="text-muted-foreground mb-4">
-            Oracle AI Database runs the entire RAG pipeline in-database: <span className="text-vector">vector embeddings</span>, <span className="text-hnsw">similarity search</span>, and context assembly — all without data ever leaving the database. Type a question and watch each stage light up.
-          </p>
-          <RagPipelineWidget />
-          <p className="text-muted-foreground mb-4">
-            Each stage is clickable — freeze the pipeline at any point to inspect the intermediate data. This transparency is what makes Oracle&apos;s in-database RAG powerful: you can debug, audit, and optimize every step.
-          </p>
+        {/* ===== 06 RAG Pipeline ===== */}
+        <section id="rag" className="reveal v2-section">
+          <div className="v2-divider" />
+          <div className="flex items-start gap-4 mb-5">
+            <span className="v2-section-num mt-1.5">06</span>
+            <h2 className="v2-heading text-2xl md:text-4xl font-bold">The RAG Pipeline, demystified</h2>
+          </div>
+          <div className="max-w-2xl">
+            <p className="text-[#8b8d9a] mb-4 leading-relaxed">
+              <span className="text-rag">Retrieval-Augmented Generation</span> (RAG) is the dominant pattern for building AI applications that need factual, up-to-date answers. Instead of relying solely on the LLM&apos;s training data, RAG retrieves relevant documents and feeds them as context.
+            </p>
+            <p className="text-[#8b8d9a] mb-4 leading-relaxed">
+              Oracle AI Database runs the entire RAG pipeline in-database: <span className="text-vector">vector embeddings</span>, <span className="text-hnsw">similarity search</span>, and context assembly, all without data ever leaving the database. Type a question and watch each stage light up.
+            </p>
+          </div>
+          <div className="v2-widget-frame my-8">
+            <RagPipelineWidget />
+          </div>
+          <div className="max-w-2xl">
+            <p className="text-[#8b8d9a] leading-relaxed">
+              Each stage is clickable. Freeze the pipeline at any point to inspect the intermediate data. This transparency is what makes Oracle&apos;s in-database RAG powerful: you can debug, audit, and optimize every step.
+            </p>
+          </div>
         </section>
 
-        {/* ===== ACID Section ===== */}
-        <section id="acid" className="reveal">
-          <h2 className="text-3xl font-bold leading-tight mt-14 mb-4">Why ACID matters for AI</h2>
-          <p className="text-muted-foreground mb-4">
-            Most vector databases sacrifice <span className="text-acid">ACID transactions</span> for speed. This works fine for demos — but in production, concurrent users reading and writing vectors creates real problems: <em>phantom reads</em>, <em>dirty reads</em>, and <em>lost updates</em>.
-          </p>
-          <p className="text-muted-foreground mb-4">
-            Oracle AI Database provides full ACID guarantees on vector operations. Below, watch two concurrent users interact with the same data. On the left: Oracle&apos;s transactional consistency. On the right: what happens without it.
-          </p>
-          <AcidRaceWidget />
-          <p className="text-muted-foreground mb-4">
-            Try each scenario. The <span className="text-acid">anomalies</span> on the right aren&apos;t theoretical — they happen in production when vector data is modified during queries. Oracle&apos;s MVCC isolation ensures every read sees a consistent snapshot.
-          </p>
+        {/* ===== 07 ACID ===== */}
+        <section id="acid" className="reveal v2-section">
+          <div className="v2-divider" />
+          <div className="flex items-start gap-4 mb-5">
+            <span className="v2-section-num mt-1.5">07</span>
+            <h2 className="v2-heading text-2xl md:text-4xl font-bold">Why ACID matters for AI</h2>
+          </div>
+          <div className="max-w-2xl">
+            <p className="text-[#8b8d9a] mb-4 leading-relaxed">
+              Most vector databases sacrifice <span className="text-acid">ACID transactions</span> for speed. Fine for demos, but in production, concurrent users reading and writing vectors creates real problems: phantom reads, dirty reads, lost updates.
+            </p>
+            <p className="text-[#8b8d9a] mb-4 leading-relaxed">
+              Oracle AI Database provides full ACID guarantees on vector operations. Below, watch two concurrent users interact with the same data. Left: Oracle&apos;s transactional consistency. Right: what happens without it.
+            </p>
+          </div>
+          <div className="v2-widget-frame my-8">
+            <AcidRaceWidget />
+          </div>
+          <div className="max-w-2xl">
+            <p className="text-[#8b8d9a] leading-relaxed">
+              Try each scenario. The <span className="text-acid">anomalies</span> on the right aren&apos;t theoretical. They happen in production when vector data is modified during queries. Oracle&apos;s MVCC isolation ensures every read sees a consistent snapshot.
+            </p>
+          </div>
         </section>
 
-        {/* ===== Deep Data Security Section ===== */}
-        <section id="security" className="reveal">
-          <h2 className="text-3xl font-bold leading-tight mt-14 mb-4">Deep Data Security for Vector Search</h2>
-          <p className="text-muted-foreground mb-4">
-            Vector databases typically have no concept of <em>row-level security</em>. If you can query, you can see everything. Oracle AI Database applies <strong>Deep Data Security</strong> policies directly to vector operations — similarity search results are automatically filtered based on the user&apos;s security clearance.
-          </p>
-          <p className="text-muted-foreground mb-4">
-            Switch between user roles below and <strong>click anywhere</strong> to run a similarity search. Notice how the same query returns different results depending on who is logged in — and some nearby vectors are completely invisible. The database enforces this at the storage level, not the application layer.
-          </p>
-          <DeepSecurityWidget />
-          <p className="text-muted-foreground mb-4">
-            This is critical for enterprises: HR data, financial reports, and legal documents can all live in the same vector store and participate in the same similarity searches — but each user only ever sees what their security label permits. No application-level filtering required.
-          </p>
+        {/* ===== 08 Security ===== */}
+        <section id="security" className="reveal v2-section">
+          <div className="v2-divider" />
+          <div className="flex items-start gap-4 mb-5">
+            <span className="v2-section-num mt-1.5">08</span>
+            <h2 className="v2-heading text-2xl md:text-4xl font-bold">Deep Data Security for Vector Search</h2>
+          </div>
+          <div className="max-w-2xl">
+            <p className="text-[#8b8d9a] mb-4 leading-relaxed">
+              Vector databases typically have no concept of row-level security. If you can query, you can see everything. Oracle AI Database applies <strong className="text-foreground">Deep Data Security</strong> policies directly to vector operations: similarity search results are automatically filtered based on the user&apos;s security clearance.
+            </p>
+            <p className="text-[#8b8d9a] mb-4 leading-relaxed">
+              Switch between user roles below and <strong className="text-foreground">click anywhere</strong> to run a similarity search. The same query returns different results depending on who is logged in. The database enforces this at the storage level, not the application layer.
+            </p>
+          </div>
+          <div className="v2-widget-frame my-8">
+            <DeepSecurityWidget />
+          </div>
+          <div className="max-w-2xl">
+            <p className="text-[#8b8d9a] leading-relaxed">
+              HR data, financial reports, and legal documents can all live in the same vector store. Each user only ever sees what their security label permits. No application-level filtering required.
+            </p>
+          </div>
         </section>
 
-        {/* ===== ONNX In-DB Section ===== */}
-        <section id="onnx" className="reveal">
-          <h2 className="text-3xl font-bold leading-tight mt-14 mb-4">Neural Networks inside the Database</h2>
-          <p className="text-muted-foreground mb-4">
-            Traditionally, ML inference requires extracting data from the database, sending it to an external service, and writing predictions back. Oracle AI Database runs <span className="text-onnx">ONNX models directly inside the database</span> — data never leaves.
-          </p>
-          <p className="text-muted-foreground mb-4">
-            This eliminates network latency, reduces security risk, and simplifies architecture. Toggle between <span className="text-onnx">in-database</span> and <span className="text-relational">traditional</span> modes to see the difference.
-          </p>
-          <OnnxInDbWidget />
-          <p className="text-muted-foreground mb-4">
-            In-database inference means your ML pipeline is a single SQL statement. No API calls, no serialization overhead, no data exposure — just <code className="bg-white/5 px-1 rounded text-sm">SELECT predict(model, features) FROM table</code>.
-          </p>
+        {/* ===== 09 ONNX ===== */}
+        <section id="onnx" className="reveal v2-section">
+          <div className="v2-divider" />
+          <div className="flex items-start gap-4 mb-5">
+            <span className="v2-section-num mt-1.5">09</span>
+            <h2 className="v2-heading text-2xl md:text-4xl font-bold">Neural Networks inside the Database</h2>
+          </div>
+          <div className="max-w-2xl">
+            <p className="text-[#8b8d9a] mb-4 leading-relaxed">
+              Traditionally, ML inference means extracting data from the database, sending it to an external service, and writing predictions back. Oracle AI Database runs <span className="text-onnx">ONNX models directly inside the database</span>. Data never leaves.
+            </p>
+            <p className="text-[#8b8d9a] mb-4 leading-relaxed">
+              This eliminates network latency, reduces security risk, and simplifies architecture. Toggle between <span className="text-onnx">in-database</span> and <span className="text-relational">traditional</span> modes to see the difference.
+            </p>
+          </div>
+          <div className="v2-widget-frame my-8">
+            <OnnxInDbWidget />
+          </div>
+          <div className="max-w-2xl">
+            <p className="text-[#8b8d9a] leading-relaxed">
+              In-database inference means your ML pipeline is a single SQL statement. No API calls, no serialization overhead: <code className="v2-code">SELECT predict(model, features) FROM table</code>.
+            </p>
+          </div>
         </section>
 
-        {/* ===== JSON Path Section ===== */}
-        <section id="jsonpath" className="reveal">
-          <h2 className="text-3xl font-bold leading-tight mt-14 mb-4">SQL/JSON Path Expressions</h2>
-          <p className="text-muted-foreground mb-4">
-            Oracle AI Database supports the <span className="text-jsonpath">SQL/JSON path language</span> for querying nested JSON documents. Path expressions let you navigate objects, filter arrays, and extract values — all within SQL.
-          </p>
-          <p className="text-muted-foreground mb-4">
-            Type a path expression in the input below and watch matching nodes <span className="text-jsonpath">light up</span> in real time. Try the pre-built examples to explore different path features.
-          </p>
-          <JsonPathWidget />
-          <p className="text-muted-foreground mb-4">
-            Path expressions combine with Oracle&apos;s JSON Duality Views — query the JSON shape of your relational data using powerful path syntax, with indexes accelerating the search. It&apos;s the best of both worlds.
-          </p>
+        {/* ===== 10 JSON Path ===== */}
+        <section id="jsonpath" className="reveal v2-section">
+          <div className="v2-divider" />
+          <div className="flex items-start gap-4 mb-5">
+            <span className="v2-section-num mt-1.5">10</span>
+            <h2 className="v2-heading text-2xl md:text-4xl font-bold">SQL/JSON Path Expressions</h2>
+          </div>
+          <div className="max-w-2xl">
+            <p className="text-[#8b8d9a] mb-4 leading-relaxed">
+              Oracle AI Database supports the <span className="text-jsonpath">SQL/JSON path language</span> for querying nested JSON documents. Path expressions let you navigate objects, filter arrays, and extract values, all within SQL.
+            </p>
+            <p className="text-[#8b8d9a] mb-4 leading-relaxed">
+              Type a path expression below and watch matching nodes <span className="text-jsonpath">light up</span> in real time. Try the pre-built examples.
+            </p>
+          </div>
+          <div className="v2-widget-frame my-8">
+            <JsonPathWidget />
+          </div>
+          <div className="max-w-2xl">
+            <p className="text-[#8b8d9a] leading-relaxed">
+              Path expressions combine with Oracle&apos;s JSON Duality Views: query the JSON shape of your relational data using powerful path syntax, with indexes accelerating the search.
+            </p>
+          </div>
         </section>
 
-        {/* ===== Oracle RAC Section ===== */}
-        <section id="rac" className="reveal">
-          <h2 className="text-3xl font-bold leading-tight mt-14 mb-4">Oracle RAC: Scalability and Resilience</h2>
-          <p className="text-muted-foreground mb-4">
-            <strong>Oracle RAC</strong> (Real Application Clusters) provides the foundation for running Oracle AI Database at scale. Multiple <span className="text-cyan-400">active-active</span> instances share the same storage, each capable of reading and writing simultaneously — delivering linear scalability and near-zero downtime.
-          </p>
-          <p className="text-muted-foreground mb-4">
-            With over two decades of innovation, RAC 26ai introduces <span className="text-emerald-400">Smart Connection Rebalancing</span> for dynamic workload optimization, <span className="text-amber-400">linear scaling of AI vector search</span> across instances, <span className="text-purple-400">Two-Stage Rolling Patching</span> for zero-downtime updates, and <span className="text-pink-400">Fast Start Reconfiguration</span> that resumes work 6x faster after failures.
-          </p>
-          <p className="text-muted-foreground mb-4">
-            Explore each capability below. <strong>Cluster Architecture</strong> shows the active-active design with Cache Fusion. <strong>Smart Rebalancing</strong> demonstrates workload-aware session routing. <strong>Linear Scalability</strong> uses real GloVe-25 benchmark numbers. <strong>Zero-Downtime Recovery</strong> lets you crash an instance and watch recovery.
-          </p>
-          <RacWidget />
-          <p className="text-muted-foreground mb-4">
-            Oracle RAC is the ideal platform for AI workloads: isolate CPU-intensive vector search on dedicated instances while OLTP continues uninterrupted on others. The shared-storage architecture means every instance sees the same data — including HNSW indexes — enabling distributed similarity search at scale.
-          </p>
+        {/* ===== 11 RAC ===== */}
+        <section id="rac" className="reveal v2-section">
+          <div className="v2-divider" />
+          <div className="flex items-start gap-4 mb-5">
+            <span className="v2-section-num mt-1.5">11</span>
+            <h2 className="v2-heading text-2xl md:text-4xl font-bold">Oracle RAC: Scalability and Resilience</h2>
+          </div>
+          <div className="max-w-2xl">
+            <p className="text-[#8b8d9a] mb-4 leading-relaxed">
+              <strong className="text-foreground">Oracle RAC</strong> (Real Application Clusters) provides the foundation for running Oracle AI Database at scale. Multiple active-active instances share the same storage, each capable of reading and writing simultaneously.
+            </p>
+            <p className="text-[#8b8d9a] mb-4 leading-relaxed">
+              RAC 26ai introduces Smart Connection Rebalancing, linear scaling of AI vector search across instances, Two-Stage Rolling Patching for zero-downtime updates, and Fast Start Reconfiguration that resumes work 6x faster after failures.
+            </p>
+          </div>
+          <div className="v2-widget-frame my-8">
+            <RacWidget />
+          </div>
+          <div className="max-w-2xl">
+            <p className="text-[#8b8d9a] leading-relaxed">
+              Oracle RAC is the ideal platform for AI workloads: isolate CPU-intensive vector search on dedicated instances while OLTP continues uninterrupted. The shared-storage architecture means every instance sees the same data, including HNSW indexes, enabling distributed similarity search at scale.
+            </p>
+          </div>
         </section>
 
         {/* ===== Conclusion ===== */}
-        <section>
-          <h2 className="text-3xl font-bold leading-tight mt-14 mb-4">The convergence advantage</h2>
-          <p className="text-muted-foreground mb-4">
-            What makes Oracle AI Database unique is that <span className="text-relational">relational</span>, <span className="text-json">JSON</span>, <span className="text-graph">graph</span>, <span className="text-vector">vector</span>, and beyond (XML, Text, Spatial, RDF) all happen in the <strong>same engine, on the same data</strong>. Add <span className="text-hnsw">HNSW indexing</span> for scale, <span className="text-rag">RAG pipelines</span> for AI applications, <span className="text-onnx">in-database ML inference</span> for simplicity, and <span className="text-acid">ACID transactions</span> for production reliability.
-          </p>
-          <p className="text-muted-foreground mb-4">
-            This isn&apos;t just convenient — it&apos;s a fundamental architectural advantage. When your AI application needs to combine semantic search with structured filters, relationship traversals, and ML inference, Oracle AI Database handles it all natively, in a single SQL query, with full transactional guarantees.
-          </p>
+        <section className="reveal v2-section">
+          <div className="v2-divider" />
+          <h2 className="v2-heading text-2xl md:text-4xl font-bold mb-5">The convergence advantage</h2>
+          <div className="max-w-2xl">
+            <p className="text-[#8b8d9a] mb-4 leading-relaxed">
+              What makes Oracle AI Database unique is that <span className="text-relational">relational</span>, <span className="text-json">JSON</span>, <span className="text-graph">graph</span>, <span className="text-vector">vector</span>, and beyond (XML, Text, Spatial, RDF) all happen in the same engine, on the same data. Add <span className="text-hnsw">HNSW indexing</span> for scale, <span className="text-rag">RAG pipelines</span> for AI applications, <span className="text-onnx">in-database ML inference</span> for simplicity, and <span className="text-acid">ACID transactions</span> for production reliability.
+            </p>
+            <p className="text-[#8b8d9a] leading-relaxed">
+              When your AI application needs to combine semantic search with structured filters, relationship traversals, and ML inference, Oracle AI Database handles it all natively, in a single SQL query, with full transactional guarantees.
+            </p>
+          </div>
         </section>
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-border py-12 px-6">
-        <div className="max-w-3xl mx-auto text-center">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="w-6 h-6 rounded-md flex items-center justify-center font-extrabold text-white text-xs" style={{ background: "#C74634" }}>O</div>
-            <span className="font-semibold">Oracle AI Database</span>
+      <footer className="v2-footer px-6 py-16">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center gap-2.5 mb-3">
+            <div className="w-6 h-6 rounded-md flex items-center justify-center font-extrabold text-white text-xs bg-[#C74634]">O</div>
+            <span className="font-semibold text-sm tracking-tight">Oracle AI Database</span>
           </div>
-          <p className="text-muted-foreground text-sm mb-3">
-            11 interactive explorations: JSON Duality Views, Cascading Updates, Property Graphs, Vector Search, HNSW Indexing, RAG Pipelines, ACID Transactions, Deep Data Security, In-Database ONNX, SQL/JSON Path, and Oracle RAC.
-          </p>
-          <p className="text-muted-foreground text-xs">
-            Inspired by the visual style of educational technical blogs. Built with Next.js + React + TypeScript.
+          <p className="text-[#6b6d7a] text-sm max-w-sm leading-relaxed">
+            11 interactive explorations of Oracle AI Database capabilities.
+            Built with Next.js, React, and TypeScript.
           </p>
         </div>
       </footer>
-    </main>
+    </div>
   );
 }
