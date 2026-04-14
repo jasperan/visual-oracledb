@@ -42,6 +42,7 @@ export default function Home() {
           <span className="hidden md:inline text-sm font-semibold">Oracle AI Database</span>
         </a>
         <div className="flex gap-3 md:gap-4 overflow-x-auto whitespace-nowrap scrollbar-hide ml-auto">
+          <a href="v2" className="text-purple-400/80 no-underline text-xs font-medium hover:text-purple-300 transition-colors shrink-0 border border-purple-400/20 rounded-full px-2.5 py-0.5">v2 &rarr;</a>
           <a href="#duality" className="text-muted-foreground no-underline text-xs md:text-sm font-medium hover:text-foreground transition-colors">Duality</a>
           <a href="#graphs" className="text-muted-foreground no-underline text-xs md:text-sm font-medium hover:text-foreground transition-colors">Graphs</a>
           <a href="#vectors" className="text-muted-foreground no-underline text-xs md:text-sm font-medium hover:text-foreground transition-colors">Vectors</a>
