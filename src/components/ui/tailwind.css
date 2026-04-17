@@ -1,7 +1,0 @@
-@import "shadcn/themes.css";
-
-@layer base {
-  :root {
-    --radius: 0.625rem;
-  }
-}
