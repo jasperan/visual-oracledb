@@ -32,3 +32,19 @@ next-env.d.ts
 # IDE
 .idea/
 .vscode/
+
+# Agent/skill directories
+.agents/
+.claude/
+.crush/
+.openhands/
+.serena/
+
+# Generated outputs
+dogfood-output/
+docs/plans/
+task_plan.md
+findings.md
+progress.md
+.playwright-mcp/
+content/
