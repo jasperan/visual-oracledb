@@ -13,7 +13,24 @@ import {
   OnnxInDbWidget,
   JsonPathWidget,
   RacWidget,
+  PlaybackWidget,
+  type PlaybackTrace,
 } from "@/components/widgets";
+
+const SQL_TRACE: PlaybackTrace = {
+  source: [
+    "SELECT id, name, VECTOR_DISTANCE(embedding, :q, COSINE) AS dist",
+    "FROM   products",
+    "ORDER  BY dist",
+    "FETCH  FIRST 3 ROWS ONLY;",
+  ].join("\n"),
+  steps: [
+    { line: 1, vars: { stage: "parse", rows_scanned: 0 }, note: "Query parsed. Cosine distance against query vector :q." },
+    { line: 2, vars: { stage: "scan", rows_scanned: 12048 }, note: "HNSW index traversal narrows candidates." },
+    { line: 3, vars: { stage: "sort", rows_scanned: 12048, top_dist: 0.0312 }, note: "Top candidates sorted by distance." },
+    { line: 4, vars: { stage: "fetch", rows_scanned: 12048, top_dist: 0.0312, rows_returned: 3 }, note: "Returning top-3 nearest neighbors." },
+  ],
+};
 
 const SECTIONS = [
   { id: "duality", short: "Duality", full: "JSON Duality Views", num: "01" },
@@ -138,6 +155,11 @@ export default function Home() {
             ))}
           </div>
         </div>
+
+        {/* Playback preview: a vector-search SQL query, step by step */}
+        <section className="reveal">
+          <PlaybackWidget trace={SQL_TRACE} label="Vector search query · step through" />
+        </section>
 
         {/* ===== 01 JSON Duality ===== */}
         <section id="duality" className="reveal v2-section">
