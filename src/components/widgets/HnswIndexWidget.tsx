@@ -308,7 +308,6 @@ export function HnswIndexWidget() {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
-    const dpr = 2;
     const x = ((e.clientX - rect.left) / rect.width) * CANVAS_W;
     const y = ((e.clientY - rect.top) / rect.height) * CANVAS_H;
 

@@ -1,6 +1,6 @@
 # Oracle AI Database: From the Ground Up
 
-An interactive showcase of Oracle AI Database features, built as a single-page static site. 9 hands-on widgets let you poke at the core capabilities: JSON Duality Views, property graphs, vector search, HNSW indexing, RAG pipelines, ACID transactions, in-database ML inference, and SQL/JSON path queries.
+An interactive showcase of Oracle AI Database features, built as a single-page static site. 11 hands-on widgets let you poke at the core capabilities: JSON Duality Views, cascading updates, property graphs, vector search, HNSW indexing, RAG pipelines, ACID transactions, deep data security, in-database ML inference, SQL/JSON path queries, and Real Application Clusters.
 
 **[Live Demo](https://jasperan.github.io/visual-oracledb/)**
 
@@ -8,7 +8,7 @@ An interactive showcase of Oracle AI Database features, built as a single-page s
 
 ## What's Inside
 
-Oracle AI Database converges relational, JSON, graph, and vector data into a single engine. Each widget below visualizes one capability with interactive controls, so you can build intuition for how these features work under the hood.
+Oracle AI Database converges relational, JSON, graph, and vector data into a single engine. Each widget below visualizes one capability with interactive controls, so you can build intuition for how these features work under the hood. The page opens with a step-through playback of a vector-search SQL query — scrub the timeline to watch the parse, scan, sort, and fetch stages execute line by line.
 
 ### 1. JSON Duality Views
 
@@ -64,7 +64,13 @@ The widget runs 4 concurrency scenarios side by side: Oracle (ACID) on the left 
 
 ![ACID Transactions widget](screenshots/acid-transactions.png)
 
-### 8. In-Database ONNX Inference
+### 8. Deep Data Security
+
+Data security is not a single switch but layers of defense: encryption, fine-grained access control, redaction, and auditing. Oracle enforces these inside the database, so protections apply no matter how the data is queried.
+
+Step through the security layers to see how a sensitive query is inspected, masked, and audited before any row reaches the caller.
+
+### 9. In-Database ONNX Inference
 
 Traditional ML inference means extracting data, shipping it to an external service, and writing predictions back. Oracle runs ONNX models directly inside the database. Data never leaves.
 
@@ -72,13 +78,19 @@ Toggle between in-database and traditional modes to compare latency. In-database
 
 ![ONNX Inference widget](screenshots/onnx-inference.png)
 
-### 9. SQL/JSON Path Playground
+### 10. SQL/JSON Path Playground
 
 Oracle supports the SQL/JSON path language for querying nested JSON documents. Path expressions navigate objects, filter arrays, and extract values, all within SQL.
 
 Type a path expression and watch matching nodes light up in real time. Try the pre-built examples (all titles, store name, all prices, first book, location) to explore different path features.
 
 ![JSON Path widget](screenshots/jsonpath.png)
+
+### 11. Real Application Clusters
+
+Oracle RAC runs a single database across multiple active-active instances for scalability and zero-downtime resilience. The widget has four panels: cluster architecture with live Cache Fusion transfers, smart connection rebalancing, linear scalability under growing load, and zero-downtime recovery from an instance crash.
+
+Add instances as demand climbs to watch throughput scale, then simulate a crash to compare brownout times across database versions.
 
 ## Tech Stack
 
@@ -115,8 +127,8 @@ Deployed to GitHub Pages via `.github/workflows/deploy.yml`. Pushes to `main` tr
 
 1. Create `src/components/widgets/YourWidget.tsx` as a `"use client"` component
 2. Export it from `src/components/widgets/index.ts`
-3. Add a new section in `src/app/page.tsx` with an `id` for the anchor nav
-4. Add the corresponding nav link and CSS color variable for the widget theme
+3. Add an entry to the `SECTIONS` array in `src/app/page.tsx` (this drives the sticky nav) and render the widget in its matching section with the same `id`
+4. Add a CSS color variable for the widget theme in `globals.css`
 
 ## License
 

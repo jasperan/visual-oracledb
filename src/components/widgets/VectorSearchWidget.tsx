@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
 interface DataPoint {
   id: string;
@@ -31,6 +31,26 @@ const CANVAS_W = 1360;
 const CANVAS_H = 840;
 const CAM_DIST = 3.5;
 const FOV = 600;
+
+// Camera basis vectors (right, up, forward) + camera position on a sphere
+// looking at the origin, derived from orbit azimuth/elevation and zoom.
+function cameraBasis(azimuth: number, elevation: number, zoom: number) {
+  const cosAz = Math.cos(azimuth);
+  const sinAz = Math.sin(azimuth);
+  const cosEl = Math.cos(elevation);
+  const sinEl = Math.sin(elevation);
+
+  const fwd = { x: -cosEl * sinAz, y: -sinEl, z: -cosEl * cosAz };
+  const right = { x: cosAz, y: 0, z: -sinAz };
+  const up = { x: sinEl * sinAz, y: -cosEl, z: sinEl * cosAz };
+  const cam = {
+    x: (-fwd.x * CAM_DIST) / zoom,
+    y: (-fwd.y * CAM_DIST) / zoom,
+    z: (-fwd.z * CAM_DIST) / zoom,
+  };
+
+  return { fwd, right, up, cam };
+}
 
 export function VectorSearchWidget() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -64,37 +84,17 @@ export function VectorSearchWidget() {
       const cy = y - 0.5;
       const cz = z - 0.5;
 
-      // Camera position on sphere looking at origin
-      const cosAz = Math.cos(azimuth);
-      const sinAz = Math.sin(azimuth);
-      const cosEl = Math.cos(elevation);
-      const sinEl = Math.sin(elevation);
-
-      // Camera basis vectors (right, up, forward)
-      const fwdX = -cosEl * sinAz;
-      const fwdY = -sinEl;
-      const fwdZ = -cosEl * cosAz;
-      const rightX = cosAz;
-      const rightY = 0;
-      const rightZ = -sinAz;
-      const upX = sinEl * sinAz;
-      const upY = -cosEl;
-      const upZ = sinEl * cosAz;
-
-      // Camera position
-      const camX = -fwdX * CAM_DIST / zoom;
-      const camY = -fwdY * CAM_DIST / zoom;
-      const camZ = -fwdZ * CAM_DIST / zoom;
+      const { fwd, right, up, cam } = cameraBasis(azimuth, elevation, zoom);
 
       // Vector from camera to point
-      const dx = cx - camX;
-      const dy = cy - camY;
-      const dz = cz - camZ;
+      const dx = cx - cam.x;
+      const dy = cy - cam.y;
+      const dz = cz - cam.z;
 
       // Project onto camera basis
-      const viewX = dx * rightX + dy * rightY + dz * rightZ;
-      const viewY = dx * upX + dy * upY + dz * upZ;
-      const viewZ = dx * fwdX + dy * fwdY + dz * fwdZ;
+      const viewX = dx * right.x + dy * right.y + dz * right.z;
+      const viewY = dx * up.x + dy * up.y + dz * up.z;
+      const viewZ = dx * fwd.x + dy * fwd.y + dz * fwd.z;
 
       // Perspective divide
       const scale = viewZ > 0.01 ? FOV / viewZ : FOV / 0.01;
@@ -109,29 +109,12 @@ export function VectorSearchWidget() {
   // Inverse project: given screen coords, find the 3D point on the plane closest to current query's depth
   const inverseProject = useCallback(
     (screenX: number, screenY: number, width: number, height: number, refZ: number) => {
-      const cosAz = Math.cos(azimuth);
-      const sinAz = Math.sin(azimuth);
-      const cosEl = Math.cos(elevation);
-      const sinEl = Math.sin(elevation);
-
-      const fwdX = -cosEl * sinAz;
-      const fwdY = -sinEl;
-      const fwdZ = -cosEl * cosAz;
-      const rightX = cosAz;
-      const rightY = 0;
-      const rightZ = -sinAz;
-      const upX = sinEl * sinAz;
-      const upY = -cosEl;
-      const upZ = sinEl * cosAz;
-
-      const camX = -fwdX * CAM_DIST / zoom;
-      const camY = -fwdY * CAM_DIST / zoom;
-      const camZ = -fwdZ * CAM_DIST / zoom;
+      const { fwd, right, up, cam } = cameraBasis(azimuth, elevation, zoom);
 
       // We want to find a 3D point at a given view-depth
       // Use the reference depth from the current query point
       const qcx = refZ - 0.5;
-      const refViewZ = (qcx - camX) * fwdX + (0 - camY) * fwdY + (0 - camZ) * fwdZ;
+      const refViewZ = (qcx - cam.x) * fwd.x + (0 - cam.y) * fwd.y + (0 - cam.z) * fwd.z;
       const targetViewZ = Math.max(refViewZ, 0.5);
 
       const scale = FOV / targetViewZ;
@@ -139,9 +122,9 @@ export function VectorSearchWidget() {
       const viewY = -(screenY - height / 2 - panY) / scale;
 
       // Reconstruct world position: cam + viewZ*fwd + viewX*right + viewY*up
-      const wx = camX + targetViewZ * fwdX + viewX * rightX + viewY * upX;
-      const wy = camY + targetViewZ * fwdY + viewX * rightY + viewY * upY;
-      const wz = camZ + targetViewZ * fwdZ + viewX * rightZ + viewY * upZ;
+      const wx = cam.x + targetViewZ * fwd.x + viewX * right.x + viewY * up.x;
+      const wy = cam.y + targetViewZ * fwd.y + viewX * right.y + viewY * up.y;
+      const wz = cam.z + targetViewZ * fwd.z + viewX * right.z + viewY * up.z;
 
       return {
         x: Math.max(0.02, Math.min(0.98, wx + 0.5)),
@@ -170,6 +153,16 @@ export function VectorSearchWidget() {
       }
     },
     [metric]
+  );
+
+  // All data points sorted by distance to the query (single source of truth
+  // for both the canvas draw pass and the textual nearest-neighbor list).
+  const sortedDistances = useMemo(
+    () =>
+      dataPoints
+        .map((p) => ({ id: p.id, label: p.label, distance: calculateDistance(p, query) }))
+        .sort((a, b) => a.distance - b.distance),
+    [query, calculateDistance]
   );
 
   // Check if screen point is near the projected query
@@ -281,14 +274,8 @@ export function VectorSearchWidget() {
     });
     projectedPoints.sort((a, b) => a.depth - b.depth);
 
-    // Calculate nearest neighbors using original coordinates
-    const distances = dataPoints.map((p) => ({
-      id: p.id,
-      label: p.label,
-      distance: calculateDistance(p, query),
-    }));
-    distances.sort((a, b) => a.distance - b.distance);
-    const nearest = distances.slice(0, k);
+    // Nearest neighbors derived from the shared sorted-distance list
+    const nearest = sortedDistances.slice(0, k);
     const nearestIds = new Set(nearest.map((n) => n.id));
 
     // Draw connection lines
@@ -310,7 +297,7 @@ export function VectorSearchWidget() {
         const midY = (qProj.screenY + p.screenY) / 2;
         ctx.fillStyle = "rgba(255,255,255,0.6)";
         ctx.font = "18px JetBrains Mono";
-        const dist = distances.find((d) => d.id === p.id);
+        const dist = sortedDistances.find((d) => d.id === p.id);
         if (dist) ctx.fillText(dist.distance.toFixed(3), midX + 5, midY - 3);
       }
     });
@@ -394,7 +381,7 @@ export function VectorSearchWidget() {
       qProj.screenX + qRadius + 6,
       qProj.screenY + 22
     );
-  }, [query, k, azimuth, elevation, zoom, panX, panY, metric, project, calculateDistance]);
+  }, [query, k, azimuth, elevation, zoom, panX, panY, project, sortedDistances]);
 
   // Mouse handlers for orbit/pan/query-drag
   const handleMouseDown = useCallback(
@@ -538,9 +525,7 @@ export function VectorSearchWidget() {
         <span>
           Top {k} nearest ({metric}):
         </span>{" "}
-        {dataPoints
-          .map((p) => ({ ...p, distance: calculateDistance(p, query) }))
-          .sort((a, b) => a.distance - b.distance)
+        {sortedDistances
           .slice(0, k)
           .map((p, i) => (
             <span key={p.id}>

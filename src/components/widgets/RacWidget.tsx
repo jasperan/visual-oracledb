@@ -229,36 +229,30 @@ function ArchitecturePanel() {
 // ============================================================
 // SUB-WIDGET 2: Smart Connection Rebalancing
 // ============================================================
+type Session = { id: number; workload: string; inst: number; color: string };
+
+const SCATTERED_SESSIONS: Session[] = [
+  { id: 1, workload: "Sales", inst: 0, color: "#38bdf8" },
+  { id: 2, workload: "Sales", inst: 1, color: "#38bdf8" },
+  { id: 3, workload: "Sales", inst: 2, color: "#38bdf8" },
+  { id: 4, workload: "HR", inst: 0, color: "#4ade80" },
+  { id: 5, workload: "HR", inst: 2, color: "#4ade80" },
+  { id: 6, workload: "HR", inst: 3, color: "#4ade80" },
+  { id: 7, workload: "Inventory", inst: 1, color: "#fbbf24" },
+  { id: 8, workload: "Inventory", inst: 3, color: "#fbbf24" },
+  { id: 9, workload: "Inventory", inst: 0, color: "#fbbf24" },
+];
+
 function RebalancePanel() {
   const [balanced, setBalanced] = useState(false);
-  const [sessions, setSessions] = useState([
-    { id: 1, workload: "Sales", inst: 0, color: "#38bdf8" },
-    { id: 2, workload: "Sales", inst: 1, color: "#38bdf8" },
-    { id: 3, workload: "Sales", inst: 2, color: "#38bdf8" },
-    { id: 4, workload: "HR", inst: 0, color: "#4ade80" },
-    { id: 5, workload: "HR", inst: 2, color: "#4ade80" },
-    { id: 6, workload: "HR", inst: 3, color: "#4ade80" },
-    { id: 7, workload: "Inventory", inst: 1, color: "#fbbf24" },
-    { id: 8, workload: "Inventory", inst: 3, color: "#fbbf24" },
-    { id: 9, workload: "Inventory", inst: 0, color: "#fbbf24" },
-  ]);
+  const [sessions, setSessions] = useState<Session[]>(() => SCATTERED_SESSIONS.map((s) => ({ ...s })));
 
   const instNames = ["Inst 1", "Inst 2", "Inst 3", "Inst 4"];
 
   const smartRebalance = useCallback(() => {
     if (balanced) {
       // Reset to scattered
-      setSessions([
-        { id: 1, workload: "Sales", inst: 0, color: "#38bdf8" },
-        { id: 2, workload: "Sales", inst: 1, color: "#38bdf8" },
-        { id: 3, workload: "Sales", inst: 2, color: "#38bdf8" },
-        { id: 4, workload: "HR", inst: 0, color: "#4ade80" },
-        { id: 5, workload: "HR", inst: 2, color: "#4ade80" },
-        { id: 6, workload: "HR", inst: 3, color: "#4ade80" },
-        { id: 7, workload: "Inventory", inst: 1, color: "#fbbf24" },
-        { id: 8, workload: "Inventory", inst: 3, color: "#fbbf24" },
-        { id: 9, workload: "Inventory", inst: 0, color: "#fbbf24" },
-      ]);
+      setSessions(SCATTERED_SESSIONS.map((s) => ({ ...s })));
       setBalanced(false);
     } else {
       // Group by workload
@@ -565,6 +559,7 @@ function RecoveryPanel() {
   const [elapsed, setElapsed] = useState(0);
   const [mode, setMode] = useState<"26ai" | "19c">("26ai");
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const startTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const recoveryTime = mode === "26ai" ? 3.1 : 18.5; // seconds (simulated)
 
@@ -575,7 +570,7 @@ function RecoveryPanel() {
     setElapsed(0);
 
     // Start reconfig after brief pause
-    setTimeout(() => {
+    startTimerRef.current = setTimeout(() => {
       setPhase("reconfig");
       const start = Date.now();
       timerRef.current = setInterval(() => {
@@ -590,6 +585,7 @@ function RecoveryPanel() {
   }, [recoveryTime]);
 
   const reset = useCallback(() => {
+    if (startTimerRef.current) clearTimeout(startTimerRef.current);
     if (timerRef.current) clearInterval(timerRef.current);
     setPhase("running");
     setFailedInst(-1);
@@ -597,7 +593,10 @@ function RecoveryPanel() {
   }, []);
 
   useEffect(() => {
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+    return () => {
+      if (startTimerRef.current) clearTimeout(startTimerRef.current);
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
   }, []);
 
   const instData = [

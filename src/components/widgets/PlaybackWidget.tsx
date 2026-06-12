@@ -109,6 +109,8 @@ export default function PlaybackWidget({ trace, label = "Code Playback" }: Playb
     );
   }
 
+  // `step` is guaranteed non-null past the `total === 0` early return above.
+  const s = step!;
   const sourceLines = trace.source.split("\n");
 
   return (
@@ -120,7 +122,7 @@ export default function PlaybackWidget({ trace, label = "Code Playback" }: Playb
         <pre className="bg-card p-4 m-0 font-mono text-sm leading-6 overflow-x-auto">
           {sourceLines.map((line, i) => {
             const lineNum = i + 1;
-            const isActive = step!.line === lineNum;
+            const isActive = s.line === lineNum;
             return (
               <div
                 key={i}
@@ -139,10 +141,10 @@ export default function PlaybackWidget({ trace, label = "Code Playback" }: Playb
         <div className="bg-card p-4 font-mono text-sm space-y-3">
           <div>
             <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">vars</div>
-            {Object.keys(step!.vars).length === 0 ? (
+            {Object.keys(s.vars).length === 0 ? (
               <div className="text-muted-foreground">—</div>
             ) : (
-              Object.entries(step!.vars).map(([k, v]) => (
+              Object.entries(s.vars).map(([k, v]) => (
                 <div key={k} className={changedVars.has(k) ? "pulse-highlight rounded px-1" : "px-1"}>
                   <span className="json-key">{k}</span>
                   <span className="json-bracket">: </span>
@@ -151,18 +153,18 @@ export default function PlaybackWidget({ trace, label = "Code Playback" }: Playb
               ))
             )}
           </div>
-          {step!.stack && step!.stack.length > 0 && (
+          {s.stack && s.stack.length > 0 && (
             <div>
               <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">stack</div>
-              {step!.stack.map((frame, i) => (
+              {s.stack.map((frame, i) => (
                 <div key={i}>{frame}</div>
               ))}
             </div>
           )}
-          {step!.heap && Object.keys(step!.heap).length > 0 && (
+          {s.heap && Object.keys(s.heap).length > 0 && (
             <div>
               <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">heap</div>
-              {Object.entries(step!.heap).map(([k, v]) => (
+              {Object.entries(s.heap).map(([k, v]) => (
                 <div key={k}>
                   <span className="json-key">{k}</span>
                   <span className="json-bracket">: </span>
@@ -174,8 +176,8 @@ export default function PlaybackWidget({ trace, label = "Code Playback" }: Playb
         </div>
       </div>
 
-      {step!.note && (
-        <p className="text-sm text-muted-foreground mt-3 italic">{step!.note}</p>
+      {s.note && (
+        <p className="text-sm text-muted-foreground mt-3 italic">{s.note}</p>
       )}
 
       <div className="playback-controls mt-4">

@@ -15,13 +15,13 @@ npm run lint       # ESLint (runs `eslint`, not `next lint`)
 npm run typecheck  # tsc --noEmit
 ```
 
-No test framework is configured. Quality checks are `lint` + `typecheck`. There is a `src/app/test/page.tsx` route for manual widget testing during development (not an automated test).
+No test framework is configured. Quality checks are `lint` + `typecheck`.
 
 ## Architecture
 
 **Stack**: Next.js 16.2.1 (static export) + React 19 + TypeScript 5 + Tailwind CSS v4
 
-**Key deps**: `clsx` + `tailwind-merge` for class composition, `lucide-react` for icons, `@base-ui/react` for accessible primitives, `tw-animate-css` for animation utilities, `class-variance-authority` for variant styles. The `shadcn` package is the shadcn CLI (not a component library).
+**Key deps**: Runtime dependencies are intentionally minimal — `next`, `react`, `react-dom`, and `tw-animate-css` (Tailwind animation utilities). There is no UI/icon library: widgets render with hand-written canvas/SVG and inline icon path data, so don't reach for `lucide-react`, `clsx`, `shadcn`, etc. — they aren't installed.
 
 **Layout**: Single-page app. `src/app/page.tsx` is the main page (`"use client"`) containing a hero section, sticky nav with anchor links, and widget sections revealed on scroll via IntersectionObserver.
 
