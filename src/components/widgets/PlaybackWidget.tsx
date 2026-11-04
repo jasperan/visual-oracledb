@@ -2,6 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+/** Line icon for the transport controls. */
+const ICON = (d: string, filled = false, d2?: string) => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d={d} />
+    {d2 ? <path d={d2} /> : null}
+  </svg>
+);
+
 export type PlaybackStep = {
   line: number;
   vars: Record<string, unknown>;
@@ -101,7 +109,7 @@ export default function PlaybackWidget({ trace, label = "Code Playback" }: Playb
   if (total === 0) {
     return (
       <div className="widget-container bg-card border border-border rounded-xl p-6 my-8 overflow-hidden">
-        <div className="text-xs text-muted-foreground uppercase tracking-wider mb-4 font-mono">
+        <div className="text-xs text-muted-foreground mb-4 font-mono">
           Interactive · {label}
         </div>
         <p className="text-muted-foreground text-sm">No trace provided.</p>
@@ -115,7 +123,7 @@ export default function PlaybackWidget({ trace, label = "Code Playback" }: Playb
 
   return (
     <div className="widget-container bg-card border border-border rounded-xl p-6 my-8 overflow-hidden">
-      <div className="text-xs text-muted-foreground uppercase tracking-wider mb-4 font-mono">
+      <div className="text-xs text-muted-foreground mb-4 font-mono">
         Interactive · {label}
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-border rounded-lg overflow-hidden">
@@ -140,7 +148,7 @@ export default function PlaybackWidget({ trace, label = "Code Playback" }: Playb
         </pre>
         <div className="bg-card p-4 font-mono text-sm space-y-3">
           <div>
-            <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">vars</div>
+            <div className="text-xs text-muted-foreground mb-2">vars</div>
             {Object.keys(s.vars).length === 0 ? (
               <div className="text-muted-foreground">—</div>
             ) : (
@@ -155,7 +163,7 @@ export default function PlaybackWidget({ trace, label = "Code Playback" }: Playb
           </div>
           {s.stack && s.stack.length > 0 && (
             <div>
-              <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">stack</div>
+              <div className="text-xs text-muted-foreground mb-2">stack</div>
               {s.stack.map((frame, i) => (
                 <div key={i}>{frame}</div>
               ))}
@@ -163,7 +171,7 @@ export default function PlaybackWidget({ trace, label = "Code Playback" }: Playb
           )}
           {s.heap && Object.keys(s.heap).length > 0 && (
             <div>
-              <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">heap</div>
+              <div className="text-xs text-muted-foreground mb-2">heap</div>
               {Object.entries(s.heap).map(([k, v]) => (
                 <div key={k}>
                   <span className="json-key">{k}</span>
@@ -180,9 +188,9 @@ export default function PlaybackWidget({ trace, label = "Code Playback" }: Playb
         <p className="text-sm text-muted-foreground mt-3 italic">{s.note}</p>
       )}
 
-      <div className="playback-controls mt-4">
-        <button className="btn-mono playback-btn" onClick={() => setStepIndex(0)} aria-label="First step">⏮</button>
-        <button className="btn-mono playback-btn" onClick={() => setStepIndex((i) => Math.max(i - 1, 0))} aria-label="Previous step">◀</button>
+      <div className="mt-4 flex items-center gap-2 flex-wrap">
+        <button className="btn-mono playback-btn" onClick={() => setStepIndex(0)} aria-label="First step">{ICON("M19 20 9 12l10-8z", true, "M5 19V5")}</button>
+        <button className="btn-mono playback-btn" onClick={() => setStepIndex((i) => Math.max(i - 1, 0))} aria-label="Previous step">{ICON("M15 18l-6-6 6-6")}</button>
         <button
           className="btn-mono playback-btn"
           onClick={() => {
@@ -191,10 +199,10 @@ export default function PlaybackWidget({ trace, label = "Code Playback" }: Playb
           }}
           aria-label={isPlaying ? "Pause" : "Play"}
         >
-          {isPlaying ? "⏸" : "▶"}
+          {isPlaying ? ICON("M7 4h4v16H7zM13 4h4v16h-4z", true) : ICON("M6 4l14 8-14 8z", true)}
         </button>
-        <button className="btn-mono playback-btn" onClick={() => setStepIndex((i) => Math.min(i + 1, total - 1))} aria-label="Next step">▶</button>
-        <button className="btn-mono playback-btn" onClick={() => { stop(); setStepIndex(total - 1); }} aria-label="Last step">⏭</button>
+        <button className="btn-mono playback-btn" onClick={() => setStepIndex((i) => Math.min(i + 1, total - 1))} aria-label="Next step">{ICON("M9 6l6 6-6 6")}</button>
+        <button className="btn-mono playback-btn" onClick={() => { stop(); setStepIndex(total - 1); }} aria-label="Last step">{ICON("M5 4l10 8-10 8z", true, "M19 5v14")}</button>
         <input
           type="range"
           min={0}

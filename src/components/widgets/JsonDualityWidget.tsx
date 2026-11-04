@@ -107,7 +107,7 @@ export function JsonDualityWidget() {
     <div className={`bg-card ${compact ? "p-3" : "p-4"} min-h-[280px]`}>
       <div className="flex items-center gap-2 mb-3 text-sm">
         <span className="text-cyan-400">{"{}"}</span>
-        <span className="text-cyan-400 font-mono text-xs uppercase tracking-wider">employee_dv</span>
+        <span className="text-cyan-400 font-mono text-xs">employee_dv</span>
       </div>
       <pre className={`font-mono ${compact ? "text-[10px]" : "text-xs"} leading-relaxed`}>
         <span className="json-bracket">[</span>
@@ -186,7 +186,7 @@ export function JsonDualityWidget() {
     <div className={`bg-card ${compact ? "p-3" : "p-4"} min-h-[280px]`}>
       <div className="flex items-center gap-2 mb-3 text-sm">
         <span className="text-emerald-400">{"{}"}</span>
-        <span className="text-emerald-400 font-mono text-xs uppercase tracking-wider">department_dv</span>
+        <span className="text-emerald-400 font-mono text-xs">department_dv</span>
       </div>
       <pre className={`font-mono ${compact ? "text-[10px]" : "text-xs"} leading-relaxed`}>
         <span className="json-bracket">[</span>
@@ -247,7 +247,7 @@ export function JsonDualityWidget() {
 
   return (
     <div className="widget-container bg-card border border-border rounded-xl p-6 my-8 overflow-hidden">
-      <div className="text-xs text-muted-foreground uppercase tracking-wider mb-4 font-mono">Interactive · JSON Duality Views</div>
+      <div className="text-xs text-muted-foreground mb-4 font-mono">Interactive · JSON Duality Views</div>
 
       {/* View toggle */}
       <div className="flex items-center gap-2 mb-4 flex-wrap">
@@ -280,7 +280,7 @@ export function JsonDualityWidget() {
           <div className="bg-card border border-border rounded-lg p-4 mb-2">
             <div className="flex items-center gap-2 mb-3 text-sm">
               <span className="text-orange-500">⊕</span>
-              <span className="text-orange-500 font-mono text-xs uppercase tracking-wider">employees table</span>
+              <span className="text-orange-500 font-mono text-xs">employees table</span>
               <span className="text-muted-foreground font-mono text-[10px] ml-2">(single source of truth)</span>
             </div>
             <div className="grid grid-cols-[40px_1fr_100px_60px] gap-2 text-xs font-mono mb-1 pb-2 border-b border-border">
@@ -348,7 +348,7 @@ export function JsonDualityWidget() {
           <div className="bg-card p-4 min-h-[280px]">
             <div className="flex items-center gap-2 mb-3 text-sm">
               <span className="text-orange-500">⊕</span>
-              <span className="text-orange-500 font-mono text-xs uppercase tracking-wider">employees table</span>
+              <span className="text-orange-500 font-mono text-xs">employees table</span>
             </div>
             <div className="grid grid-cols-[40px_1fr_100px_60px] gap-2 text-xs font-mono mb-1 pb-2 border-b border-border">
               <span className="text-muted-foreground">ID</span>

@@ -22,7 +22,7 @@ export function CascadeWidget() {
 
   return (
     <div className="widget-container bg-card border border-border rounded-xl p-6 my-8 overflow-hidden">
-      <div className="text-xs text-muted-foreground uppercase tracking-wider mb-4 font-mono">Interactive · Cascading Update Propagation</div>
+      <div className="text-xs text-muted-foreground mb-4 font-mono">Interactive · Cascading Update Propagation</div>
 
       <div className="flex items-center gap-4 mb-4 flex-wrap">
         <label className="font-mono text-sm text-muted-foreground whitespace-nowrap">Alice&apos;s dept_id:</label>
@@ -41,7 +41,7 @@ export function CascadeWidget() {
         <div className="bg-card p-4">
           <div className="flex items-center gap-2 mb-3 text-sm">
             <span className="text-orange-500">⊕</span>
-            <span className="text-orange-500 font-mono text-xs uppercase tracking-wider">employees</span>
+            <span className="text-orange-500 font-mono text-xs">employees</span>
           </div>
           <div className="grid grid-cols-[60px_1fr_80px] gap-2 text-xs font-mono mb-1 pb-2 border-b border-border">
             <span className="text-muted-foreground">ID</span>
@@ -63,7 +63,7 @@ export function CascadeWidget() {
         <div className="bg-card p-4">
           <div className="flex items-center gap-2 mb-3 text-sm">
             <span className="text-cyan-400">{"{}"}</span>
-            <span className="text-cyan-400 font-mono text-xs uppercase tracking-wider">employee_dv</span>
+            <span className="text-cyan-400 font-mono text-xs">employee_dv</span>
           </div>
           <pre className="font-mono text-sm leading-relaxed">
             <span className="json-bracket">{"{"}</span>

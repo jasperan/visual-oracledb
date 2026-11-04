@@ -249,7 +249,7 @@ export function AcidRaceWidget() {
         }
       `}</style>
 
-      <div className="text-xs text-muted-foreground uppercase tracking-wider mb-4 font-mono">
+      <div className="text-xs text-muted-foreground mb-4 font-mono">
         Interactive &middot; ACID vs Eventually Consistent
       </div>
 

@@ -65,3 +65,7 @@ content/
 .claude/settings.local.json
 .claude/launch.json
 .codex
+.omo/
+.ckg/
+.smart_goal_state.json
+export.json

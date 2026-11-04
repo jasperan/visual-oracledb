@@ -736,7 +736,7 @@ export function RacWidget() {
 
   return (
     <div className="widget-container bg-card border border-border rounded-xl p-6 my-8 overflow-hidden">
-      <div className="text-xs text-muted-foreground uppercase tracking-wider mb-4 font-mono">
+      <div className="text-xs text-muted-foreground mb-4 font-mono">
         Interactive &middot; Oracle RAC (Real Application Clusters)
       </div>
 

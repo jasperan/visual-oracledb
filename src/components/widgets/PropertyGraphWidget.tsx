@@ -433,7 +433,7 @@ export function PropertyGraphWidget() {
 
   return (
     <div className="widget-container bg-card border border-border rounded-xl p-6 my-8 overflow-hidden">
-      <div className="text-xs text-muted-foreground uppercase tracking-wider mb-4 font-mono">
+      <div className="text-xs text-muted-foreground mb-4 font-mono">
         Interactive &middot; Property Graph Visualization
       </div>
 
@@ -570,7 +570,7 @@ export function PropertyGraphWidget() {
             className="absolute bg-black/90 border border-border rounded-lg p-3 text-sm pointer-events-none z-10 max-w-[250px]"
             style={{ left: tooltipPos.x, top: tooltipPos.y }}
           >
-            <div className="text-xs uppercase tracking-wider font-mono mb-1" style={{ color: getNodeColor(activeNode.type) }}>
+            <div className="text-xs font-mono mb-1" style={{ color: getNodeColor(activeNode.type) }}>
               {activeNode.type}
             </div>
             <div className="font-semibold mb-2">
@@ -590,7 +590,7 @@ export function PropertyGraphWidget() {
       {/* SQL/PGQ Query Panel */}
       {showQuery && sqlQuery && (
         <div className="mt-2 bg-black/50 border border-border rounded-lg p-4 font-mono text-xs overflow-x-auto">
-          <div className="text-muted-foreground uppercase tracking-wider mb-2 text-[10px]">
+          <div className="text-muted-foreground mb-2 text-[10px]">
             SQL/PGQ Query{shortestPath ? " (Shortest Path)" : ""}
           </div>
           <pre className="text-emerald-300 whitespace-pre-wrap leading-relaxed">
