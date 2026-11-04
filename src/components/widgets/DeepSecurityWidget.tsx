@@ -21,6 +21,27 @@ const SECURITY_COLORS: Record<SecurityLabel, string> = {
   restricted: "#ef4444",
 };
 
+/** Line lock glyph, 12px, inherits the current text colour. */
+function LockMark() {
+  return (
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      style={{ display: "inline-block", flexShrink: 0 }}
+    >
+      <rect x="5" y="11" width="14" height="10" rx="2" />
+      <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+    </svg>
+  );
+}
+
 const SECURITY_ORDER: SecurityLabel[] = ["public", "internal", "confidential", "restricted"];
 
 const ROLE_ACCESS: Record<UserRole, SecurityLabel[]> = {
@@ -208,12 +229,16 @@ export function DeepSecurityWidget() {
       ctx.setLineDash([]);
       ctx.globalAlpha = 1;
 
-      // Lock icon (small)
+      // Small lock: shackle arc over a body
+      ctx.globalAlpha = 0.35;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.arc(v.x, v.y - 1.5, 2.2, Math.PI, 0);
+      ctx.stroke();
+      ctx.globalAlpha = 0.3;
       ctx.fillStyle = color;
-      ctx.globalAlpha = 0.25;
-      ctx.font = "10px sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText("🔒", v.x, v.y + 4);
+      ctx.fillRect(v.x - 3, v.y - 0.5, 6, 4.5);
       ctx.globalAlpha = 1;
     }
 
@@ -222,16 +247,14 @@ export function DeepSecurityWidget() {
       const color = SECURITY_COLORS[v.securityLabel];
       const isResult = resultSet.has(v.id);
 
-      // Glow for results
+      // Static halo marks a result, no pulsing
       if (isResult) {
-        const glowR = 20 + Math.sin(Date.now() / 150) * 3;
-        const glow = ctx.createRadialGradient(v.x, v.y, 0, v.x, v.y, glowR);
-        glow.addColorStop(0, "rgba(167,139,250,0.4)");
-        glow.addColorStop(1, "rgba(167,139,250,0)");
+        ctx.globalAlpha = 0.18;
+        ctx.fillStyle = color;
         ctx.beginPath();
-        ctx.arc(v.x, v.y, glowR, 0, Math.PI * 2);
-        ctx.fillStyle = glow;
+        ctx.arc(v.x, v.y, 18, 0, Math.PI * 2);
         ctx.fill();
+        ctx.globalAlpha = 1;
       }
 
       // Node
@@ -302,7 +325,7 @@ export function DeepSecurityWidget() {
 
   return (
     <div className="widget-container bg-card border border-border rounded-xl p-6 my-8 overflow-hidden">
-      <div className="text-xs text-muted-foreground uppercase tracking-wider mb-4 font-mono">
+      <div className="text-xs text-muted-foreground mb-4 font-mono">
         Interactive &middot; Deep Data Security + Vector Search
       </div>
 
@@ -336,7 +359,7 @@ export function DeepSecurityWidget() {
             <span key={label} className="flex items-center gap-1" style={{ opacity: hasAccess ? 1 : 0.25 }}>
               <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: SECURITY_COLORS[label] }} />
               <span style={{ color: hasAccess ? SECURITY_COLORS[label] : "#52525b" }}>{label}</span>
-              {!hasAccess && <span className="text-[10px]">🔒</span>}
+              {!hasAccess && <LockMark />}
             </span>
           );
         })}
@@ -402,7 +425,7 @@ export function DeepSecurityWidget() {
           </span>
         ))}
         <span className="text-border">|</span>
-        <span>🔒 = filtered by row-level security</span>
+        <span className="flex items-center gap-1.5"><LockMark /> filtered by row-level security</span>
       </div>
     </div>
   );

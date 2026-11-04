@@ -61,7 +61,7 @@ export function VectorSearchWidget() {
   // Camera state: azimuth (horizontal angle), elevation (vertical angle), zoom
   const [azimuth, setAzimuth] = useState(0.6);
   const [elevation, setElevation] = useState(0.4);
-  const [zoom, setZoom] = useState(1.0);
+  const [zoom, setZoom] = useState(2.6);
   const [panX, setPanX] = useState(0);
   const [panY, setPanY] = useState(0);
 
@@ -199,9 +199,9 @@ export function VectorSearchWidget() {
     const axisLength = 1.0;
     const axisOrigin = { x: 0, y: 0, z: 0 };
     const axes = [
-      { end: { x: axisLength, y: 0, z: 0 }, color: "#ef4444", label: "X" },
-      { end: { x: 0, y: axisLength, z: 0 }, color: "#22c55e", label: "Y" },
-      { end: { x: 0, y: 0, z: axisLength }, color: "#3b82f6", label: "Z" },
+      { end: { x: axisLength, y: 0, z: 0 }, color: "rgba(255,255,255,0.22)", label: "X" },
+      { end: { x: 0, y: axisLength, z: 0 }, color: "rgba(255,255,255,0.22)", label: "Y" },
+      { end: { x: 0, y: 0, z: axisLength }, color: "rgba(255,255,255,0.22)", label: "Z" },
     ];
 
     const oProj = project(axisOrigin.x, axisOrigin.y, axisOrigin.z, width, height);
@@ -247,7 +247,7 @@ export function VectorSearchWidget() {
 
     // Draw light grid on the XZ plane (y=0)
     ctx.globalAlpha = 0.08;
-    ctx.strokeStyle = "#a78bfa";
+    ctx.strokeStyle = "rgba(255,255,255,0.5)";
     ctx.lineWidth = 1;
     for (let i = 0; i <= 4; i++) {
       const t = i * 0.25;
@@ -285,20 +285,13 @@ export function VectorSearchWidget() {
         ctx.beginPath();
         ctx.moveTo(qProj.screenX, qProj.screenY);
         ctx.lineTo(p.screenX, p.screenY);
-        ctx.strokeStyle = "rgba(167,139,250,0.4)";
+        ctx.strokeStyle = "rgba(199,70,52,0.45)";
         ctx.lineWidth = 1.5;
         ctx.setLineDash([4, 4]);
         ctx.stroke();
         ctx.setLineDash([]);
         ctx.lineWidth = 1;
 
-        // Distance label
-        const midX = (qProj.screenX + p.screenX) / 2;
-        const midY = (qProj.screenY + p.screenY) / 2;
-        ctx.fillStyle = "rgba(255,255,255,0.6)";
-        ctx.font = "18px JetBrains Mono";
-        const dist = sortedDistances.find((d) => d.id === p.id);
-        if (dist) ctx.fillText(dist.distance.toFixed(3), midX + 5, midY - 3);
       }
     });
 
@@ -317,11 +310,11 @@ export function VectorSearchWidget() {
         radius
       );
       if (isNearest) {
-        sphereGradient.addColorStop(0, "#facc15");
-        sphereGradient.addColorStop(1, "#f97316");
+        sphereGradient.addColorStop(0, "#DB6150");
+        sphereGradient.addColorStop(1, "#B23B2C");
       } else {
-        sphereGradient.addColorStop(0, "#4ade80");
-        sphereGradient.addColorStop(1, "#22d3ee");
+        sphereGradient.addColorStop(0, "#93AEC2");
+        sphereGradient.addColorStop(1, "#6A8496");
       }
 
       ctx.beginPath();
@@ -329,11 +322,12 @@ export function VectorSearchWidget() {
       ctx.fillStyle = sphereGradient;
       ctx.fill();
 
-      // Always show labels (with depth-based alpha)
-      const alpha = Math.max(0.3, Math.min(1, p.scale));
-      ctx.fillStyle = `rgba(255,255,255,${alpha * 0.8})`;
-      ctx.font = `${Math.round(16 * Math.max(0.7, Math.min(1.2, p.scale)))}px JetBrains Mono`;
-      ctx.fillText(p.label, p.screenX + radius + 4, p.screenY + 4);
+      // Only the nearest neighbours are labelled; the rest are just points
+      if (isNearest) {
+        ctx.fillStyle = "rgba(232,232,236,0.9)";
+        ctx.font = "15px JetBrains Mono";
+        ctx.fillText(p.label, p.screenX + radius + 6, p.screenY + 5);
+      }
     });
 
     // Draw query point
@@ -346,41 +340,31 @@ export function VectorSearchWidget() {
       qProj.screenY,
       qRadius
     );
-    queryGradient.addColorStop(0, "#f472b6");
-    queryGradient.addColorStop(1, "#a78bfa");
-
-    // Outer glow for query
-    const glowGradient = ctx.createRadialGradient(
-      qProj.screenX, qProj.screenY, qRadius,
-      qProj.screenX, qProj.screenY, qRadius * 2.5
-    );
-    glowGradient.addColorStop(0, "rgba(244,114,182,0.25)");
-    glowGradient.addColorStop(1, "rgba(244,114,182,0)");
-    ctx.beginPath();
-    ctx.arc(qProj.screenX, qProj.screenY, qRadius * 2.5, 0, Math.PI * 2);
-    ctx.fillStyle = glowGradient;
-    ctx.fill();
+    queryGradient.addColorStop(0, "rgba(199,70,52,0.18)");
+    queryGradient.addColorStop(1, "rgba(199,70,52,0)");
 
     ctx.beginPath();
     ctx.arc(qProj.screenX, qProj.screenY, qRadius, 0, Math.PI * 2);
     ctx.fillStyle = queryGradient;
     ctx.fill();
-    ctx.strokeStyle = "#fff";
+    ctx.strokeStyle = "#C74634";
     ctx.lineWidth = 2.5;
     ctx.stroke();
 
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 18px JetBrains Mono";
-    ctx.fillText("QUERY", qProj.screenX + qRadius + 6, qProj.screenY + 5);
+    ctx.textAlign = "right";
+    ctx.fillStyle = "#C74634";
+    ctx.font = "600 15px JetBrains Mono";
+    ctx.fillText("query", qProj.screenX - qRadius - 8, qProj.screenY - 2);
 
     // Coordinate readout for query
-    ctx.fillStyle = "rgba(255,255,255,0.4)";
-    ctx.font = "14px JetBrains Mono";
+    ctx.fillStyle = "rgba(255,255,255,0.45)";
+    ctx.font = "13px JetBrains Mono";
     ctx.fillText(
       `(${query.x.toFixed(2)}, ${query.y.toFixed(2)}, ${query.z.toFixed(2)})`,
-      qProj.screenX + qRadius + 6,
-      qProj.screenY + 22
+      qProj.screenX - qRadius - 8,
+      qProj.screenY + 14
     );
+    ctx.textAlign = "start";
   }, [query, k, azimuth, elevation, zoom, panX, panY, project, sortedDistances]);
 
   // Mouse handlers for orbit/pan/query-drag
@@ -487,17 +471,17 @@ export function VectorSearchWidget() {
 
   return (
     <div className="widget-container bg-card border border-border rounded-xl p-6 my-8 overflow-hidden">
-      <div className="text-xs text-muted-foreground uppercase tracking-wider mb-4 font-mono">
+      <div className="text-xs text-muted-foreground mb-4 font-mono">
         Interactive &middot; Similarity Search in 3D Space
       </div>
 
       <div className="flex items-center gap-4 mb-3 flex-wrap">
         <label className="font-mono text-sm text-muted-foreground">k nearest:</label>
-        <input type="range" min="1" max="8" value={k} onChange={(e) => setK(Number(e.target.value))} className="w-28" />
-        <span className="font-mono text-purple-400">{k}</span>
+        <input type="range" min="1" max="8" value={k} onChange={(e) => setK(Number(e.target.value))} style={{ width: 120 }} aria-label="Number of neighbors" />
+        <span className="font-mono text-foreground">{k}</span>
         <label className="font-mono text-sm text-muted-foreground ml-4">Zoom:</label>
-        <input type="range" min="40" max="300" value={Math.round(zoom * 100)} onChange={(e) => setZoom(Number(e.target.value) / 100)} className="w-28" />
-        <span className="font-mono text-purple-400">{Math.round(zoom * 100)}%</span>
+        <input type="range" min="100" max="600" value={Math.round(zoom * 100)} onChange={(e) => setZoom(Number(e.target.value) / 100)} style={{ width: 120 }} aria-label="Zoom" />
+        <span className="font-mono text-foreground">{Math.round(zoom * 100)}%</span>
         <div className="flex-1" />
         <span className="font-mono text-xs text-muted-foreground">
           Drag: orbit &middot; Shift+Drag: pan &middot; Drag query to move
@@ -505,8 +489,8 @@ export function VectorSearchWidget() {
       </div>
 
       <div
-        className="relative w-full h-[420px] rounded-lg overflow-hidden"
-        style={{ background: "radial-gradient(ellipse at center,rgba(167,139,250,0.05),transparent 70%)" }}
+        className="relative w-full aspect-[1360/840] rounded-lg overflow-hidden"
+        style={{ background: "var(--card)" }}
       >
         <canvas
           ref={canvasRef}
@@ -529,7 +513,7 @@ export function VectorSearchWidget() {
           .slice(0, k)
           .map((p, i) => (
             <span key={p.id}>
-              <span style={{ color: i === 0 ? "#facc15" : "#4ade80" }}>{p.label}</span>
+              <span style={{ color: i === 0 ? "#C74634" : "var(--muted-foreground)" }}>{p.label}</span>
               <span className="text-muted-foreground"> ({p.distance.toFixed(3)})</span>
               {i < k - 1 && <span className="text-muted-foreground">, </span>}
             </span>
@@ -551,7 +535,7 @@ export function VectorSearchWidget() {
           onClick={() => {
             setAzimuth(0.6);
             setElevation(0.4);
-            setZoom(1.0);
+            setZoom(2.6);
             setPanX(0);
             setPanY(0);
           }}

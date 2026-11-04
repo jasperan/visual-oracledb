@@ -484,7 +484,7 @@ export function JsonPathWidget() {
 
   return (
     <div className="widget-container bg-card border border-border rounded-xl p-6 my-8 overflow-hidden">
-      <div className="text-xs text-muted-foreground uppercase tracking-wider mb-4 font-mono">
+      <div className="text-xs text-muted-foreground mb-4 font-mono">
         Interactive &middot; SQL/JSON Path Playground
       </div>
 
@@ -508,7 +508,7 @@ export function JsonPathWidget() {
         <div className="bg-card p-4 min-h-[320px] overflow-auto">
           <div className="flex items-center gap-2 mb-3 text-sm">
             <span className="text-amber-400 font-mono text-xs">{"{ }"}</span>
-            <span className="text-amber-400 font-mono text-xs uppercase tracking-wider">JSON Document</span>
+            <span className="text-amber-400 font-mono text-xs">JSON Document</span>
           </div>
           <pre className="font-mono text-sm leading-relaxed whitespace-pre-wrap">
             <JsonTreeNode
@@ -528,7 +528,7 @@ export function JsonPathWidget() {
         <div className="bg-card p-4 min-h-[320px] flex flex-col">
           <div className="flex items-center gap-2 mb-3 text-sm">
             <span className="text-amber-400 font-mono text-xs">$</span>
-            <span className="text-amber-400 font-mono text-xs uppercase tracking-wider">Path Expression</span>
+            <span className="text-amber-400 font-mono text-xs">Path Expression</span>
           </div>
 
           {/* Query input */}
@@ -558,7 +558,7 @@ export function JsonPathWidget() {
           {/* Results */}
           {resultValues.length > 0 && (
             <div className="flex-1 overflow-auto">
-              <div className="text-xs text-muted-foreground font-mono mb-2 uppercase tracking-wider">
+              <div className="text-xs text-muted-foreground font-mono mb-2">
                 {resultValues.length} Match{resultValues.length !== 1 ? "es" : ""}
               </div>
               <div className="space-y-2">

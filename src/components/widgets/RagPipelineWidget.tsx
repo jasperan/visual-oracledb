@@ -11,7 +11,34 @@ const STAGE_LABELS = [
   "LLM Response",
 ];
 
-const STAGE_ICONS = ["\u2753", "\u{1F9EE}", "\u{1F50D}", "\u{1F4C4}", "\u{1F9E9}", "\u{1F916}"];
+/** Six line glyphs, one per pipeline stage. */
+const STAGE_PATHS = [
+  "M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3",
+  "M4 7h16M4 12h10M4 17h7",
+  "M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4",
+  "M6 3h9l4 4v14H6zM14 3v5h5",
+  "M12 3v6m0 6v6M3 12h6m6 0h6",
+  "M4 6h16v10H8l-4 4z",
+];
+
+function StageGlyph({ index, color }: { index: number; color: string }) {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      style={{ marginBottom: 6 }}
+    >
+      <path d={STAGE_PATHS[index]} />
+    </svg>
+  );
+}
 
 const DOC_CHUNKS = [
   "Oracle AI Database supports JSON Duality Views that provide both relational and JSON access to the same data...",
@@ -200,18 +227,16 @@ export function RagPipelineWidget() {
       padding: "8px 4px",
       borderRadius: 8,
       border: isActive
-        ? "2px solid #fb923c"
+        ? "1px solid #C74634"
         : isCompleted
-          ? "2px solid #4ade80"
+          ? "1px solid rgba(255,255,255,0.16)"
           : "1px solid rgba(255,255,255,0.08)",
       background: isFrozen
-        ? "rgba(251,146,60,0.1)"
+        ? "rgba(199,70,52,0.08)"
         : isActive
-          ? "rgba(251,146,60,0.06)"
+          ? "rgba(199,70,52,0.06)"
           : "rgba(255,255,255,0.02)",
-      boxShadow: isActive
-        ? "0 0 16px rgba(251,146,60,0.3)"
-        : "none",
+      boxShadow: "none",
       cursor: idx <= stage ? "pointer" : "default",
       opacity: idx <= stage || stage === -1 ? 1 : 0.4,
       transition: "all 0.3s ease",
@@ -235,7 +260,7 @@ export function RagPipelineWidget() {
         {/* Stage 0: Question */}
         {stage >= 0 && (
           <div className="animate-fade-in" style={{ padding: 12, borderRadius: 8, border: "1px solid rgba(251,146,60,0.2)", background: "rgba(251,146,60,0.04)" }}>
-            <div className="font-mono text-xs text-muted-foreground uppercase tracking-wider mb-2">
+            <div className="font-mono text-xs text-muted-foreground mb-2">
               <span style={{ color: "#4ade80" }}>&#10003;</span> Step 1 &middot; Input Question
             </div>
             <div className="font-mono text-sm" style={{ color: "#fb923c" }}>
@@ -247,7 +272,7 @@ export function RagPipelineWidget() {
         {/* Stage 1: Embedding */}
         {stage >= 1 && (
           <div className="animate-fade-in" style={{ padding: 12, borderRadius: 8, border: "1px solid rgba(251,146,60,0.2)", background: "rgba(251,146,60,0.04)" }}>
-            <div className="font-mono text-xs text-muted-foreground uppercase tracking-wider mb-2">
+            <div className="font-mono text-xs text-muted-foreground mb-2">
               <span style={{ color: "#4ade80" }}>&#10003;</span> Step 2 &middot; Generate Embedding Vector
             </div>
             <div className="font-mono text-xs mb-2" style={{ color: "#a1a1aa" }}>
@@ -269,7 +294,7 @@ export function RagPipelineWidget() {
         {/* Stage 2: Vector Search */}
         {stage >= 2 && (
           <div className="animate-fade-in" style={{ padding: 12, borderRadius: 8, border: "1px solid rgba(167,139,250,0.2)", background: "rgba(167,139,250,0.04)" }}>
-            <div className="font-mono text-xs text-muted-foreground uppercase tracking-wider mb-2">
+            <div className="font-mono text-xs text-muted-foreground mb-2">
               <span style={{ color: "#4ade80" }}>&#10003;</span> Step 3 &middot; HNSW Vector Index Search
             </div>
             <div className="font-mono text-xs mb-2" style={{ color: "#a1a1aa" }}>
@@ -302,7 +327,7 @@ export function RagPipelineWidget() {
         {/* Stage 3: Retrieval */}
         {stage >= 3 && (
           <div className="animate-fade-in" style={{ padding: 12, borderRadius: 8, border: "1px solid rgba(34,211,238,0.2)", background: "rgba(34,211,238,0.04)" }}>
-            <div className="font-mono text-xs text-muted-foreground uppercase tracking-wider mb-2">
+            <div className="font-mono text-xs text-muted-foreground mb-2">
               <span style={{ color: "#4ade80" }}>&#10003;</span> Step 4 &middot; Retrieve Document Chunks
             </div>
             <div className="font-mono text-xs mb-2" style={{ color: "#a1a1aa" }}>
@@ -324,7 +349,7 @@ export function RagPipelineWidget() {
         {/* Stage 4: Prompt Assembly */}
         {stage >= 4 && (
           <div className="animate-fade-in" style={{ padding: 12, borderRadius: 8, border: "1px solid rgba(74,222,128,0.2)", background: "rgba(74,222,128,0.04)" }}>
-            <div className="font-mono text-xs text-muted-foreground uppercase tracking-wider mb-2">
+            <div className="font-mono text-xs text-muted-foreground mb-2">
               <span style={{ color: "#4ade80" }}>&#10003;</span> Step 5 &middot; Assemble Prompt
             </div>
             <div className="font-mono text-xs mb-2" style={{ color: "#a1a1aa" }}>
@@ -344,7 +369,7 @@ export function RagPipelineWidget() {
         {/* Stage 5: LLM Response */}
         {stage >= 5 && (
           <div className="animate-fade-in" style={{ padding: 12, borderRadius: 8, border: "1px solid rgba(244,114,182,0.2)", background: "rgba(244,114,182,0.04)" }}>
-            <div className="font-mono text-xs text-muted-foreground uppercase tracking-wider mb-2">
+            <div className="font-mono text-xs text-muted-foreground mb-2">
               {isAnimating ? <span style={{ color: "#fb923c" }}>&#9679;</span> : <span style={{ color: "#4ade80" }}>&#10003;</span>} Step 6 &middot; LLM Response
             </div>
             <div className="font-mono text-xs mb-2" style={{ color: "#a1a1aa" }}>
@@ -353,7 +378,7 @@ export function RagPipelineWidget() {
             <div className="font-mono text-sm" style={{ color: "#e4e4e7", lineHeight: 1.6, padding: "8px 10px", borderRadius: 6, background: "rgba(0,0,0,0.2)" }}>
               {streamedText || SAMPLE_RESPONSE}
               {isAnimating && stage === 5 && (
-                <span style={{ display: "inline-block", width: 8, height: 14, background: "#fb923c", marginLeft: 2, animation: "pulse-highlight 0.8s ease-out infinite" }} />
+                <span style={{ display: "inline-block", width: 8, height: 14, background: "#C74634", marginLeft: 2, animation: "highlightFlash 0.8s ease-out infinite" }} />
               )}
             </div>
           </div>
@@ -364,7 +389,7 @@ export function RagPipelineWidget() {
 
   return (
     <div className="widget-container bg-card border border-border rounded-xl p-6 my-8 overflow-hidden">
-      <div className="text-xs text-muted-foreground uppercase tracking-wider mb-4 font-mono">
+      <div className="text-xs text-muted-foreground mb-4 font-mono">
         Interactive &middot; RAG Pipeline
       </div>
 
@@ -416,16 +441,17 @@ export function RagPipelineWidget() {
                 if (e.key === "Enter" || e.key === " ") handleStageClick(idx);
               }}
             >
-              <span style={{ fontSize: 20, marginBottom: 4 }}>
-                {STAGE_ICONS[idx]}
-              </span>
+              <StageGlyph
+                index={idx}
+                color={idx === stage && isAnimating ? "#C74634" : idx <= stage ? "#e8e8ec" : "#6b6d7a"}
+              />
               <span
                 className="font-mono"
                 style={{
                   fontSize: 10,
                   color:
                     idx === stage && isAnimating
-                      ? "#fb923c"
+                      ? "#C74634"
                       : idx <= stage
                         ? "#e4e4e7"
                         : "#a1a1aa",
