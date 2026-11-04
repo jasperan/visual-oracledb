@@ -370,7 +370,7 @@ export function DeepSecurityWidget() {
 
       {/* Canvas */}
       <div
-        className="relative w-full rounded-lg overflow-hidden"
+        className="relative w-full mx-auto rounded-lg overflow-hidden"
         style={{ maxWidth: CANVAS_W, aspectRatio: `${CANVAS_W}/${CANVAS_H}`, background: "#0d0d0f" }}
       >
         <canvas

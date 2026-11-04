@@ -134,7 +134,7 @@ export default function Home() {
       </header>
 
       {/* Content */}
-      <div id="content" className="max-w-[1024px] mx-auto px-6 pb-28">
+      <div id="content" className="max-w-[1024px] mx-auto px-6">
 
         {/* TOC */}
         <div className="py-8 mb-4 border-y border-white/[0.07]">
@@ -279,49 +279,57 @@ export default function Home() {
             </p>
           </div>
         </section>
+      </div>
 
-        {/* ===== 07 ACID ===== */}
-        <section id="acid" className="reveal v2-section">
-          <div className="v2-divider" />
-          <p className="v2-section-num">7</p>
-          <h2 className="v2-heading text-3xl md:text-[2rem] text-foreground">Why ACID matters for AI</h2>
-          <div className="mt-6 max-w-[46rem] space-y-4 text-[1rem] leading-[1.65]">
-            <p className="text-muted-foreground">
-              Most vector databases sacrifice <strong className="text-foreground">ACID transactions</strong> for speed. Fine for demos, but in production, concurrent users reading and writing vectors creates real problems: phantom reads, dirty reads, lost updates.
-            </p>
-            <p className="text-muted-foreground">
-              Oracle AI Database provides full ACID guarantees on vector operations. Below, watch two concurrent users interact with the same data. Left: Oracle&apos;s transactional consistency. Right: what happens without it.
-            </p>
+      {/* ===== 07 ACID — full-bleed comparison ===== */}
+      <section id="acid" className="v2-compare reveal">
+        <div className="v2-compare-grid">
+          <div className="v2-compare-copy">
+            <p className="v2-section-num">7</p>
+            <h2 className="v2-heading text-3xl md:text-[2rem] text-foreground">Why ACID matters for AI</h2>
+            <div className="mt-6 space-y-4 text-[1rem] leading-[1.65]">
+              <p className="text-muted-foreground">
+                Most vector databases sacrifice <strong className="text-foreground">ACID transactions</strong> for speed. Fine for demos, but in production, concurrent users reading and writing vectors creates real problems: phantom reads, dirty reads, lost updates.
+              </p>
+              <p className="text-muted-foreground">
+                Oracle AI Database provides full ACID guarantees on vector operations. Watch two concurrent users interact with the same data: Oracle&apos;s transactional consistency on the left, the same workload without it on the right.
+              </p>
+              <p className="text-muted-foreground">
+                Try each scenario. The <strong className="text-foreground">anomalies</strong> on the right aren&apos;t theoretical. They happen in production when vector data is modified during queries. Oracle&apos;s MVCC isolation ensures every read sees a consistent snapshot.
+              </p>
+            </div>
           </div>
-          <AcidRaceWidget />
-          <div className="mt-6 max-w-[46rem] space-y-4 text-[1rem] leading-[1.65]">
-            <p className="text-muted-foreground">
-              Try each scenario. The <strong className="text-foreground">anomalies</strong> on the right aren&apos;t theoretical. They happen in production when vector data is modified during queries. Oracle&apos;s MVCC isolation ensures every read sees a consistent snapshot.
-            </p>
+          <div className="v2-compare-stage">
+            <AcidRaceWidget />
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* ===== 08 Security ===== */}
-        <section id="security" className="reveal v2-section">
-          <div className="v2-divider" />
-          <p className="v2-section-num">8</p>
-          <h2 className="v2-heading text-3xl md:text-[2rem] text-foreground">Deep Data Security for Vector Search</h2>
-          <div className="mt-6 max-w-[46rem] space-y-4 text-[1rem] leading-[1.65]">
-            <p className="text-muted-foreground">
-              Vector databases typically have no concept of row-level security. If you can query, you can see everything. Oracle AI Database applies <strong className="text-foreground">Deep Data Security</strong> policies directly to vector operations: similarity search results are automatically filtered based on the user&apos;s security clearance.
-            </p>
-            <p className="text-muted-foreground">
-              Switch between user roles below and <strong className="text-foreground">click anywhere</strong> to run a similarity search. The same query returns different results depending on who is logged in. The database enforces this at the storage level, not the application layer.
-            </p>
+      {/* ===== 08 Security — full-bleed comparison ===== */}
+      <section id="security" className="v2-compare reveal">
+        <div className="v2-compare-grid">
+          <div className="v2-compare-copy">
+            <p className="v2-section-num">8</p>
+            <h2 className="v2-heading text-3xl md:text-[2rem] text-foreground">Deep Data Security for Vector Search</h2>
+            <div className="mt-6 space-y-4 text-[1rem] leading-[1.65]">
+              <p className="text-muted-foreground">
+                Vector databases typically have no concept of row-level security. If you can query, you can see everything. Oracle AI Database applies <strong className="text-foreground">Deep Data Security</strong> policies directly to vector operations: similarity search results are automatically filtered based on the user&apos;s security clearance.
+              </p>
+              <p className="text-muted-foreground">
+                Switch between user roles and <strong className="text-foreground">click anywhere</strong> to run a similarity search. The same query returns different results depending on who is logged in. The database enforces this at the storage level, not the application layer.
+              </p>
+              <p className="text-muted-foreground">
+                HR data, financial reports, and legal documents can all live in the same vector store. Each user only ever sees what their security label permits. No application-level filtering required.
+              </p>
+            </div>
           </div>
-          <DeepSecurityWidget />
-          <div className="mt-6 max-w-[46rem] space-y-4 text-[1rem] leading-[1.65]">
-            <p className="text-muted-foreground">
-              HR data, financial reports, and legal documents can all live in the same vector store. Each user only ever sees what their security label permits. No application-level filtering required.
-            </p>
+          <div className="v2-compare-stage">
+            <DeepSecurityWidget />
           </div>
-        </section>
+        </div>
+      </section>
 
+      <div className="max-w-[1024px] mx-auto px-6 pb-28">
         {/* ===== 09 ONNX ===== */}
         <section id="onnx" className="reveal v2-section">
           <div className="v2-divider" />

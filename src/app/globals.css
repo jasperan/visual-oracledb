@@ -371,6 +371,45 @@ input[type="range"]::-webkit-slider-thumb {
   margin-bottom: 0.75rem;
 }
 
+/* Comparison bands: ACID and security are arguments, not demos. They leave the
+   46rem column and take the whole width, copy rail left and the stage right. */
+.v2-compare {
+  border-block: 1px solid var(--border);
+  background: #08090f;
+  padding-block: 4.5rem;
+  margin-block: 1rem;
+  scroll-margin-top: 4rem;
+}
+
+.v2-compare + .v2-compare {
+  border-top: 0;
+  margin-top: 0;
+}
+
+.v2-compare-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 23rem) minmax(0, 1fr);
+  gap: clamp(2rem, 3vw, 3.5rem);
+  align-items: start;
+  /* The copy keeps the page's own left margin; the stage breaks out to the right. */
+  padding-left: max(1.5rem, calc((100vw - 976px) / 2));
+  padding-right: clamp(1.5rem, 4vw, 4rem);
+}
+
+.v2-compare .widget-container {
+  margin: 0;
+}
+
+@media (max-width: 1023px) {
+  .v2-compare {
+    padding-block: 3rem;
+  }
+  .v2-compare-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2rem;
+  }
+}
+
 /* The widget is the card: one frame, 16px radius, hairline border */
 .v2 .widget-container {
   border: 1px solid rgba(255, 255, 255, 0.07);
